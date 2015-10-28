@@ -23,41 +23,47 @@ source:
             module: kb_vis_rgbColor
             file: RGBColor
         -
-            module: kb_widget_vis_barChart
+            module: kb_vis_barChart
             file: kbaseBarchart
         -
-            module: kb_widget_vis_chordChart
+            module: kb_vis_chordChart
             file: kbaseChordchart
         -
-            module: kb_widget_vis_circularHeatmap
+            module: kb_vis_circularHeatmap
             file: kbaseCircularHeatmap
         -
-            module: kb_widget_vis_forcedNetwork
+            module: kb_vis_forcedNetwork
             file: kbaseForcedNetwork
         -
-            module: kb_widget_vis_heatMap
+            module: kb_vis_heatMap
             file: kbaseHeatmap
         -
-            module: kb_widget_vis_histogram
+            module: kb_vis_histogram
             file: kbaseHistogram
         -
-            module: kb_widget_vis_lineSeriesChart
+            module: kb_vis_lineSeriesChart
             file: kbaseLineSerieschart
         -
-            module: kb_widget_vis_lineChart
+            module: kb_vis_lineChart
             file: kbaseLinechart
         -
-            module: kb_widget_vis_pieChart
+            module: kb_vis_pieChart
             file: kbasePiechart
         -
-            module: kb_widget_vis_scatterPlot
+            module: kb_vis_scatterPlot
             file: kbaseScatterplot
         -
-            module: kb_widget_vis_treeChart
+            module: kb_vis_treeChart
             file: kbaseTreechart
         -
-            module: kb_widget_vis_vennDiagram
+            module: kb_vis_vennDiagram
             file: kbaseVenndiagram
         -
-            module: kb_widget_vis_visWidget
-            file: kbaseVisWidget        
+            module: kb_vis_visWidget
+            file: kbaseVisWidget
+    install:
+        widgets:
+            -
+                module: kb_widget_histogram
+                id: message
+                type: kbwidget

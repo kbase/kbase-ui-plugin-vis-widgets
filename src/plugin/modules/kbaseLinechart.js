@@ -5,7 +5,7 @@
 define([
     'jquery',
     'd3',
-    'kb_widget_vis_visWidget'
+    'kb_vis_visWidget'
 ],
     function ($, d3) {
         'use strict';

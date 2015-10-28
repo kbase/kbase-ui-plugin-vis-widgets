@@ -1,16 +1,16 @@
 /*
-
+ 
  */
 
 define(
     [
         'jquery',
         'd3',
-        'kb.widget.vis.widget',
+        'kb_vis_widget',
         'kb.RGBColor',
-        'kb.geometry.rectangle',
-        'kb.geometry.point',
-        'kb.geometry.size',
+        'kb_vis_rectangle',
+        'kb_vis_point',
+        'kb_vis_size',
     ], function ($) {
 
     'use strict';

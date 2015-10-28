@@ -9,7 +9,7 @@ define(
         'kb_vis_rectangle',
         'kb_vis_point',
         'kb_vis_size',
-        'kb.jquery.widget'
+        'kb_widgetBases_kbWidget'
     ],
     function ($, d3, Rectangle, Point, Size) {
 

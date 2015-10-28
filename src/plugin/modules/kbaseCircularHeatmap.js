@@ -1,41 +1,38 @@
 /*
-
-*/
+ 
+ */
 
 define(
     [
         'jquery',
         'd3',
-        'kb.widget.vis.piechart',
-    ], function( $ ) {
+        'kb_vis_piechart',
+    ], function ($) {
 
     'use strict';
 
     $.KBWidget({
-
-	    name: "kbaseCircularHeatmap",
-	  parent: "kbasePiechart",
-
+        name: "kbaseCircularHeatmap",
+        parent: "kbasePiechart",
         version: "1.0.0",
-
         options: {
-            labels : false,
-            draggable : false,
-            gradient : false,
-            pieColor : 'black',
-            gbgColor : '#00FF00',
-            gmidColor : 'black',
-            gfgColor : '#FF0000',
-            highlightColor : 'cyan',
-            colorScale : function(idx,data,$pie) {
+            labels: false,
+            draggable: false,
+            gradient: false,
+            pieColor: 'black',
+            gbgColor: '#00FF00',
+            gmidColor: 'black',
+            gfgColor: '#FF0000',
+            highlightColor: 'cyan',
+            colorScale: function (idx, data, $pie) {
 
                 if ($pie.colorScale == undefined) {
 
-                    var domain = [0,1];
+                    var domain = [0, 1];
                     var range = [$pie.options.gbgColor || $pie.options.pieColor, $pie.options.gfgColor];
                     if ($pie.options.gmidColor) {
-                        range.splice(1,0,$pie.options.gmidColor);
-                        domain.splice(1,0,0.5);
+                        range.splice(1, 0, $pie.options.gmidColor);
+                        domain.splice(1, 0, 0.5);
                     }
 
                     $pie.colorScale = d3.scale.linear()
@@ -46,14 +43,11 @@ define(
                 return $pie.colorScale(data.val);
 
             },
-
         },
-
-        _accessors : [
-            {name : 'datasets', setter : 'setDatasets'}
+        _accessors: [
+            {name: 'datasets', setter: 'setDatasets'}
         ],
-
-        init : function(options) {
+        init: function (options) {
 
             this._super(options);
 
@@ -66,12 +60,11 @@ define(
 
             return this;
         },
-
-        setDatasets : function (newDatasets) {
+        setDatasets: function (newDatasets) {
 
             var $me = this;
             var _super = $me._super;
-            var sd = function() {
+            var sd = function () {
                 var standardLength = newDatasets.length ? newDatasets[0] : 0;
 
                 for (var i = 0; i < newDatasets.length; i++) {
@@ -97,14 +90,13 @@ define(
             $me.callAfterInit(sd);
 
         },
-
-        sliceAction : function($pie) {
+        sliceAction: function ($pie) {
 
             var radius = $pie.outerRadius();
 
-            return function() {
+            return function () {
 
-                this.on('mouseover', function(d) {
+                this.on('mouseover', function (d) {
 
                     if (d.data.gap) {
                         return;
@@ -126,46 +118,46 @@ define(
                     if ($pie.options.tooltips) {
                         $pie.showToolTip(
                             {
-                                label : d.data.tooltip || d.data.label + ' : ' + d.data.value,
-                                event : {
-                                    pageX : $pie.options.cornerToolTip ? $pie.$elem.prop('offsetLeft') + 5 : d3.event.pageX,
-                                    pageY : $pie.options.cornerToolTip ? $pie.$elem.prop('offsetTop') + 20 : d3.event.pageY
+                                label: d.data.tooltip || d.data.label + ' : ' + d.data.value,
+                                event: {
+                                    pageX: $pie.options.cornerToolTip ? $pie.$elem.prop('offsetLeft') + 5 : d3.event.pageX,
+                                    pageY: $pie.options.cornerToolTip ? $pie.$elem.prop('offsetTop') + 20 : d3.event.pageY
                                 }
                             }
                         );
                     }
 
                 })
-                .on('mouseout', function(d) {
+                    .on('mouseout', function (d) {
 
-                    if (d.data.gap) {
-                        return;
-                    }
+                        if (d.data.gap) {
+                            return;
+                        }
 
-                    if ($pie.options.tooltips) {
-                        $pie.hideToolTip();
-                    }
+                        if ($pie.options.tooltips) {
+                            $pie.hideToolTip();
+                        }
 
-                    d3.select(this).attr('fill', function (d2, idx) { return d.data.color || $pie.options.colorScale(idx, d.data, $pie) })
-                })
-                .on('dblclick', function(d) {
+                        d3.select(this).attr('fill', function (d2, idx) {
+                            return d.data.color || $pie.options.colorScale(idx, d.data, $pie)
+                        })
+                    })
+                    .on('dblclick', function (d) {
 
-                    if (d.data.gap) {
-                        return;
-                    }
+                        if (d.data.gap) {
+                            return;
+                        }
 
-                    if ($pie.options.draggable) {
+                        if ($pie.options.draggable) {
 
-                        $pie.options.startAngle = $pie.options.startAngle - d.startAngle;
-                        $pie.renderChart();
-                    }
-                })
-                ;
+                            $pie.options.startAngle = $pie.options.startAngle - d.startAngle;
+                            $pie.renderChart();
+                        }
+                    })
+                    ;
                 return this;
             }
         },
-
-
     });
 
-} );
+});
