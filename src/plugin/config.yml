@@ -61,9 +61,9 @@ source:
         -
             module: kb_vis_visWidget
             file: kbaseVisWidget
-    install:
-        widgets:
-            -
-                module: kb_widget_histogram
-                id: message
-                type: kbwidget
+install:
+    widgets:
+        -
+            module: kb_widget_histogram
+            id: message
+            type: kbwidget
