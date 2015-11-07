@@ -53,6 +53,9 @@ source:
             module: kb_vis_scatterPlot
             file: kbaseScatterplot
         -
+            module: kb_vis_sparkline
+            file: kbaseSparkline
+        -
             module: kb_vis_treeChart
             file: kbaseTreechart
         -

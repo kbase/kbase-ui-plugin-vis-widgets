@@ -1,7 +1,5 @@
-/*
- 
- */
-
+/*global define*/
+/*jslint white: true, browser: true*/
 define([
     'jquery',
     'd3',
@@ -9,17 +7,17 @@ define([
 ],
     function ($, d3) {
         'use strict';
+
         $.KBWidget({
             name: "kbaseScatterplot",
             parent: "kbaseVisWidget",
             version: "1.0.0",
             options: {
-                overColor: 'yellow',
+                overColor: 'yellow'
             },
             _accessors: [
             ],
             defaultXDomain: function () {
-
                 if (this.dataset() === undefined) {
                     return [0, 0];
                 }
@@ -39,7 +37,6 @@ define([
                 ];
             },
             defaultYDomain: function () {
-
                 if (this.dataset() === undefined) {
                     return [0, 0];
                 }
@@ -89,13 +86,11 @@ define([
                             function (d) {
                                 return d.color;
                             }
-                        )
+                        );
                 };
 
                 var mouseAction = function () {
-
                     this.on('mouseover', function (d) {
-
                         if ($scatter.options.overColor) {
                             d3.select(this)
                                 .attr('stroke', $scatter.options.overColor)
@@ -146,8 +141,7 @@ define([
                         return d3.svg.symbol().type(d.shape).size(d.weight)();
                     })
                     .call(funkyTown)
-                    .call(mouseAction)
-                    ;
+                    .call(mouseAction);
                 chart.data(this.dataset())
                     .exit().remove();
 
@@ -156,15 +150,10 @@ define([
                     .call(mouseAction)
                     .transition()
                     .duration(500)
-                    .call(funkyTown)
-                    ;
-
-
-
+                    .call(funkyTown);
             },
             setYScaleRange: function (range, yScale) {
                 return this._super(range.reverse(), yScale);
             }
         });
-
     });

@@ -1,18 +1,14 @@
-/*
- kbaseVisWidget
- */
-
-define(
-    [
-        'jquery',
-        'd3',
-        'kb_vis_rectangle',
-        'kb_vis_point',
-        'kb_vis_size',
-        'kb_widgetBases_kbWidget'
-    ],
+/*global define*/
+/*jslint white: true, browser: true*/
+define([
+    'jquery',
+    'd3',
+    'kb_vis_rectangle',
+    'kb_vis_point',
+    'kb_vis_size',
+    'kb_widgetBases_kbWidget'
+],
     function ($, d3, Rectangle, Point, Size) {
-
         'use strict';
 
         $.KBWidget({
@@ -37,12 +33,39 @@ define(
                 ticker: 0,
                 radialGradientStopColor: 'black',
                 linearGradientStopColor: 'black',
-                defaultDataset: function () {
+                defaultDataset: function defaultDataset() {
+                    return [];
+                },
+                defaultLegend: function defaultLegend() {
                     return [];
                 },
                 width: '100%',
                 height: '100%',
-                customRegions: {}
+                customRegions: {},
+                xAxisColor: 'black',
+                yAxisColor: 'black',
+                xAxisRegion: 'yPadding',
+                yAxisRegion: 'xPadding',
+                xAxisOrientation: 'bottom',
+                yAxisOrientation: 'left',
+                shouldRenderXAxis: true,
+                shouldRenderYAxis: true,
+                xLabelRegion: 'yGutter',
+                yLabelRegion: 'xGutter',
+                xLabelOffset: 0,
+                yLabelOffset: 0,
+                xLabelSize: '8pt',
+                yLabelSize: '8pt',
+                legendRegion: 'chart',
+                legendAlignment: 'TL',
+                legendOffset: [0, 0],
+                legendLineHeight: 13,
+                //legendWidth : 50,
+                legendSize: '7pt',
+                legendTextXOffset: 6,
+                legendTextYOffset: 3,
+                aspectRatio: 'default',
+                //autoLegend : true,
             },
             shouldScaleAxis: function (axis) {
                 if (this.options.scaleAxes) {
@@ -63,6 +86,7 @@ define(
                 'width',
                 'height',
                 {name: 'dataset', setter: 'setDataset'},
+                {name: 'legend', setter: 'setLegend'},
                 {name: 'input', setter: 'setInput'},
                 {name: 'xLabel', setter: 'setXLabel'},
                 {name: 'yLabel', setter: 'setYLabel'},
@@ -75,14 +99,14 @@ define(
                 'yIDMap',
                 'radialGradients',
                 'linearGradients',
-                'children',
+                'children'
             ],
             input: function () {
                 return this.dataset();
             },
             setInput: function (newInput) {
 
-                if ($.isPlainObject(newInput) && newInput.dataset != undefined) {
+                if ($.isPlainObject(newInput) && newInput.dataset !== undefined) {
                     return this.setValuesForKeys(newInput);
                 } else {
                     return this.setDataset(newInput);
@@ -118,8 +142,8 @@ define(
             setXScaleDomain: function (domain, scaleType) {
                 var xScale = this.xScale();
 
-                if (xScale == undefined) {
-                    if (scaleType == undefined) {
+                if (xScale === undefined) {
+                    if (scaleType === undefined) {
                         scaleType = this.xScaleType() || this.options.xScaleType;
                     }
 
@@ -131,7 +155,7 @@ define(
 
                 xScale.domain(domain);
 
-                if (this.options.useIDMapping && this.xIDMap() == undefined) {
+                if (this.options.useIDMapping && this.xIDMap() === undefined) {
                     this.xIDMap(this.createIDMapForDomain(domain));
                 }
 
@@ -140,7 +164,7 @@ define(
                 return xScale;
             },
             setXScaleRange: function (range, xScale) {
-                if (xScale == undefined) {
+                if (xScale === undefined) {
                     xScale = this.xScale();
                 }
                 xScale.range(range);
@@ -162,7 +186,7 @@ define(
 
                 yScale.domain(domain);
 
-                if (this.options.useIDMapping && this.yIDMap() === undefined) {
+                if (this.options.useIDMapping && this.yIDMap() == undefined) {
                     this.yIDMap(this.createIDMapForDomain(domain));
                 }
 
@@ -204,7 +228,7 @@ define(
 
                 this.ticker = function () {
                     return ++this.options.ticker;
-                }
+                };
 
                 this.uniqueID = $.proxy(function (d) {
                     if (d.id === undefined) {
@@ -249,7 +273,7 @@ define(
                     return;
                 }
 
-                if (field === undefined || field === 'chart') {
+                if (field == undefined || field === 'chart') {
                     this.renderChart();
                 }
 
@@ -265,13 +289,200 @@ define(
                     this.renderXLabel();
                 }
 
-                if (field === undefined || field === 'yLabel') {
+                if (field === undefined || field == 'yLabel') {
                     this.renderYLabel();
                 }
 
                 if (field === undefined || field === 'ulCorner') {
                     this.renderULCorner();
                 }
+
+                if (field === undefined || field == 'legend') {
+                    this.renderLegend();
+                }
+
+            },
+            fitTextToWidth: function (text, width) {
+
+                var fakeText = this.D3svg()
+                    .append('text')
+                    .attr('opacity', 0)
+                    .attr('font-size', this.options.legendSize)
+                    .text(text);
+
+                var box = fakeText[0][0].getBBox();
+
+                var truncatedText = text;
+                var truncated = false;
+                var originalWidth = box.width;
+
+                while (box.width + this.options.legendTextXOffset > width && truncatedText.length) {
+                    truncatedText = truncatedText.substring(0, truncatedText.length - 1);
+                    fakeText.text(truncatedText + '...');
+                    box = fakeText[0][0].getBBox();
+                    truncated = true;
+                }
+
+                fakeText.remove();
+
+                return {
+                    truncated: truncated,
+                    text: text,
+                    truncatedText: text === truncatedText ? text : truncatedText + '...',
+                    width: originalWidth
+                };
+
+            },
+            renderLegend: function () {
+
+                if (this.legend() === undefined) {
+                    return;
+                }
+
+                var $vis = this;
+
+                var shapeArea = {
+                    circle: 81,
+                    square: 81,
+                    'triangle-up': 49,
+                    'triangle-down': 49,
+                    diamond: 36,
+                    cross: 49
+                }
+
+                var legendRectSize = 8;
+
+                var legendRegionBounds = this[this.options.legendRegion + 'Bounds']();
+
+                var legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
+
+                var legendX = 0;
+                var legendY = 0;
+
+                var textXOffset = $vis.options.legendTextXOffset;
+                var textYOffset = $vis.options.legendTextYOffset;
+
+                if (this.options.legendAlignment.match(/B/)) {
+                    legendY = legendRegionBounds.size.height - $vis.options.legendLineHeight * this.legend().length;
+                }
+
+                if (this.options.legendAlignment.match(/R/)) {
+
+                    var actualWidth = 0;
+                    this.legend().forEach(function (item, i) {
+                        var trunc = $vis.fitTextToWidth(item.label, legendWidth);
+                        actualWidth = Math.max(actualWidth, trunc.width);
+                    });
+
+
+                    legendX = legendRegionBounds.size.width - (actualWidth + textXOffset + 6);
+
+                }
+
+                var uniqueKey = function (d) {
+                    return d.label;
+                };
+
+                this.D3svg().select(this.region(this.options.legendRegion)).selectAll('.legend')
+                    .data([0])
+                    .enter()
+                    .append('g')
+                    .attr('class', 'legend');
+
+                var legend = this.D3svg().select(this.region(this.options.legendRegion)).selectAll('.legend').selectAll('g').data(this.legend(), uniqueKey);
+
+                var gTransform = function (b, j, i) {
+                    var horz = 6 + legendX + $vis.options.legendOffset[0];
+                    var vert = 6 + i * $vis.options.legendLineHeight + legendY + $vis.options.legendOffset[1];
+                    return 'translate(' + horz + ',' + vert + ')';
+                };
+
+                legend
+                    .enter()
+                    .append('g')
+                    .each(function (d, i) {
+
+                        var g = d3.select(this);
+
+                        g.attr('transform', function (b, j) {
+                            return gTransform(b, j, i);
+                        });
+
+                        g.append('path')
+                            .attr('opacity', 0);
+
+                        g.append('text')
+                            .attr('class', 'legend-text')
+                            .attr('opacity', 0);
+                    })
+                    ;
+
+                var time = this.drawnLegend ? this.options.transitionTime : 0;
+
+                legend
+                    .each(function (d, i) {
+
+                        var g = d3.select(this);
+
+                        g.transition().duration(time).attr('transform', function (b, j) {
+                            return gTransform(b, j, i);
+                        })
+
+                        var truncationObj = $vis.fitTextToWidth(d.label, legendWidth);
+
+                        g.selectAll('path')
+                            .transition().duration(time)
+                            .attr('d', function (b) {
+                                return d3.svg.symbol().type(d.shape || 'square').size(shapeArea[d.shape] || 81)();
+                            })
+                            .style('fill', function (b, j) {
+                                return d.color;
+                            })
+                            .style('stroke', function (b, j) {
+                                return d.color;
+                            })
+                            .attr('opacity', 1);
+
+                        g.selectAll('text')
+                            .transition().duration(time)
+                            .attr('x', textXOffset)       //magic numbers make things look pretty!
+                            .attr('y', textYOffset)
+                            .attr('font-size', $vis.options.legendSize)
+                            .text(function () {
+                                return truncationObj.truncatedText;
+                            })
+                            .attr('opacity', 1);
+
+                        if (truncationObj.truncated) {
+                            g.selectAll('text')
+                                .on('mouseover', function (d) {
+                                    $vis.showToolTip({label: truncationObj.text})
+                                })
+                                .on('mouseout', function (d) {
+                                    $vis.hideToolTip();
+                                });
+                        }
+                    });
+
+                legend
+                    .exit()
+                    .each(function (d, i) {
+                        var g = d3.select(this);
+
+                        g.selectAll('path')
+                            .transition().duration(time)
+                            .attr('opacity', 0)
+                            .remove();
+
+                        g.selectAll('text')
+                            .transition().duration(time)
+                            .attr('opacity', 0)
+                            .remove();
+                    });
+
+                this.drawnLegend = true;
+
+                return;
 
             },
             renderULCorner: function () {
@@ -312,13 +523,23 @@ define(
                         .attr('width', imgSize.width)
                         .attr('height', imgSize.height)
                         .attr('xlink:href', function (d) {
-                            return d
-                        })
+                            return d;
+                        });
                 }
             },
-            setDataset: function (newDataset) {
+            setLegend: function (newLegend) {
+                if (newLegend === undefined) {
+                    newLegend = this.options.defaultLegend();
+                }
 
-                if (newDataset == undefined) {
+                this.setValueForKey('legend', newLegend);
+
+                this.render();
+            },
+            extractLegend: function (dataset) { /* no op in the super class */
+            },
+            setDataset: function (newDataset) {
+                if (newDataset === undefined) {
                     newDataset = this.options.defaultDataset();
                 }
                 ;
@@ -330,7 +551,12 @@ define(
                 }
 
                 if (this.shouldScaleAxis('y')) {
+                    console.log("SHOULD SCALE Y, so sets it", this.defaultYDomain());
                     this.setYScaleDomain(this.defaultYDomain());
+                }
+
+                if (this.options.autoLegend) {
+                    this.extractLegend(newDataset);
                 }
 
                 this.render();
@@ -392,54 +618,51 @@ define(
                 return [0, 100];
             },
             renderXLabel: function () {
-                var yGutterBounds = this.yGutterBounds();
-
+                var labelRegionBounds = this[this.options.xLabelRegion + 'Bounds']();
                 var xLabeldataset = [this.xLabel()];
+                var yOffset = this.options.xLabelOffset;
+                var xLabel = this.D3svg().select(this.region(this.options.xLabelRegion)).selectAll('.xLabel');
 
-                var xLabel = this.D3svg().select(this.region('yGutter')).selectAll('.xLabel');
                 xLabel
                     .data(xLabeldataset)
                     .text(this.xLabel())
                     .enter()
                     .append('text')
                     .attr('class', 'xLabel')
-                    .attr('x', yGutterBounds.size.width / 2)
-                    .attr('y', yGutterBounds.size.height / 2 + 3)
+                    .attr('x', labelRegionBounds.size.width / 2)
+                    .attr('y', labelRegionBounds.size.height / 2 + 3)
                     .attr('text-anchor', 'middle')
-                    .attr('font-size', '11px')
+                    .attr('font-size', this.options.xLabelSize)
                     .attr('font-family', 'sans-serif')
                     .attr('fill', 'black')
+                    .attr('transform', 'translate(0,' + yOffset + ')')
                     .text(this.xLabel());
-                ;
-
             },
             renderYLabel: function () {
-
-                var xGutterBounds = this.xGutterBounds();
-
+                var labelRegionBounds = this[this.options.yLabelRegion + 'Bounds']();
                 var yLabeldataset = [this.yLabel()];
+                var rotation = this.options.yLabelRegion == 'xPadding' ? -90 : 90;
+                var xOffset = this.options.yLabelOffset;
+                var yLabel = this.D3svg().select(this.region(this.options.yLabelRegion)).selectAll('.yLabel');
 
-                var xLabel = this.D3svg().select(this.region('xGutter')).selectAll('.yLabel');
-                xLabel
+                yLabel
                     .data(yLabeldataset)
                     .text(this.yLabel())
                     .enter()
                     .append('text')
                     .attr('class', 'yLabel')
-                    .attr('x', xGutterBounds.size.width / 2)
-                    .attr('y', xGutterBounds.size.height / 2 + 3)
+                    .attr('x', labelRegionBounds.size.width / 2)
+                    .attr('y', labelRegionBounds.size.height / 2 + 3)
                     .attr('text-anchor', 'middle')
-                    .attr('font-size', '11px')
+                    .attr('font-size', this.options.yLabelSize)
                     .attr('font-family', 'sans-serif')
                     .attr('fill', 'black')
-                    .attr('transform', 'rotate(90,'
-                        + (xGutterBounds.size.width / 2 - 7)
+                    .attr('transform', 'translate(' + xOffset + ',0) rotate(' + rotation + ','
+                        + (labelRegionBounds.size.width / 2 - 7)
                         + ','
-                        + xGutterBounds.size.height / 2
+                        + labelRegionBounds.size.height / 2
                         + ')')
                     .text(this.yLabel());
-                ;
-
             },
             xTickValues: function () {
                 return;
@@ -451,14 +674,32 @@ define(
 
                 var $self = this;
 
+                if (!this.options.shouldRenderXAxis) {
+                    return;
+                }
+
                 if (this.xScale() === undefined || this.xScale().domain === undefined) {
                     return;
+                }
+
+                var axisTransform = this.options.xAxisRegion === 'yGutter' ? axisRegionBounds.size.height : 0;
+                console.log("RENDERS X WITH TRANSFORM ", this.options.xAxisTransform);
+                if (this.options.xAxisTransform) {
+                    axisTransform = this.options.xAxisTransform;
+                }
+
+                var axisRegionBounds = this[this.options.xAxisRegion + 'Bounds']();
+
+                var xAxisOrientation = this.options.xAxisOrientation;
+
+                if (xAxisOrientation === 'bottom' && axisTransform > axisRegionBounds.size.height - 30) {
+                    xAxisOrientation = 'top';
                 }
 
                 var xAxis =
                     d3.svg.axis()
                     .scale(this.xScale())
-                    .orient('bottom');
+                    .orient(xAxisOrientation);
 
                 var ticks = this.xTickValues();
 
@@ -467,25 +708,29 @@ define(
                         .tickValues(ticks)
                         .tickSubdivide(0)
                         .tickFormat(function (d) {
-                            return $self.xTickLabel.call($self, d);
-                        })
-                        ;
+                            return $self.xTickLabel.call($self, d)
+                        });
                 }
 
                 if (!this.options.xLabels) {
                     xAxis.tickFormat('');
                 }
 
-                var gxAxis = this.D3svg().select(this.region('yPadding')).select('.xAxis');
+                var gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion)).select('.xAxis');
 
                 if (gxAxis[0][0] === undefined) {
-                    gxAxis = this.D3svg().select(this.region('yPadding'))
+                    gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion))
                         .append('g')
-                        .attr('class', 'xAxis axis');
+                        .attr('class', 'xAxis axis')
+                        .attr('fill', this.options.xAxisColor)
                 }
+                console.log("GX AXIS ", gxAxis, gxAxis[0][0].parentNode);
+
+                gxAxis[0][0].parentNode.appendChild(gxAxis[0][0]);
+
+                this.D3svg().select(this.region(this.options.xAxisRegion)).selectAll('.xAxis').attr("transform", "translate(0," + axisTransform + ")");
 
                 gxAxis.transition().call(xAxis);
-
             },
             svg2HTML: function () {
                 var $container = $.jqElem('div')
@@ -494,27 +739,34 @@ define(
                 return $container.html();
             },
             renderYAxis: function () {
+                if (!this.options.shouldRenderYAxis) {
+                    return;
+                }
 
-                if (this.yScale() == undefined) {
+                if (this.yScale() === undefined) {
                     return;
                 }
 
                 var yAxis =
                     d3.svg.axis()
                     .scale(this.yScale())
-                    .orient('left');
+                    .orient(this.options.yAxisOrientation);
 
                 if (!this.options.yLabels) {
                     yAxis.tickFormat('');
                 }
 
-                var gyAxis = this.D3svg().select(this.region('xPadding')).select('.yAxis');
+                var gyAxis = this.D3svg().select(this.region(this.options.yAxisRegion)).select('.yAxis');
+
+                var axisRegionBounds = this[this.options.yAxisRegion + 'Bounds']();
+                var axisTransform = this.options.yAxisRegion === 'xPadding' ? axisRegionBounds.size.width : 0;
 
                 if (gyAxis[0][0] === undefined) {
-                    gyAxis = this.D3svg().select(this.region('xPadding'))
+                    gyAxis = this.D3svg().select(this.region(this.options.yAxisRegion))
                         .append('g')
                         .attr('class', 'yAxis axis')
-                        .attr("transform", "translate(" + this.xPaddingBounds().size.width + ",0)")
+                        .attr('fill', this.options.yAxisColor)
+                        .attr("transform", "translate(" + axisTransform + ",0)");
                 }
 
                 gyAxis.transition().call(yAxis);
@@ -542,6 +794,34 @@ define(
              */
 
             appendUI: function ($elem) {
+                var chartBounds = this.chartBounds();
+                if (chartBounds.size.width !== chartBounds.size.height && this.options.aspectRatio !== 'default') {
+                    var diff = Math.abs(chartBounds.size.width - chartBounds.size.height);
+                    var newHeight = $elem.height();
+                    var newWidth = $elem.width();
+
+                    if (this.options.aspectRatio === 'minSquare') {
+
+                        if (chartBounds.size.width < chartBounds.size.height) {
+                            newHeight -= diff;
+                        } else if (chartBounds.size.height < chartBounds.size.width) {
+                            newWidth -= diff;
+                        }
+                    } else if (this.options.aspectRatio === 'maxSquare') {
+                        if (chartBounds.size.height < chartBounds.size.width) {
+                            newHeight += diff;
+                        } else if (chartBounds.size.width < chartBounds.size.height) {
+                            newWidth += diff;
+                        }
+                    }
+
+                    $elem.animate({
+                        'width': newWidth,
+                        'height': newHeight
+                    }, 0);
+                    this.width(newWidth);
+                    this.height(newHeight);
+                }
 
                 var D3svg;
 
@@ -554,7 +834,7 @@ define(
 
                     D3svg = d3.select($elem.get(0))
                         .append('svg')
-                        .attr('style', 'width : ' + this.options.width + '; height : ' + this.options.height);
+                        .attr('style', 'width : ' + this.options.width + '; height : ' + this.options.height)
                     //.attr('viewBox', '0 0 1600 1600')
                     //.attr('preserveAspectRatio', 'mMidYMid mMidYMid')
                     //.attr('width', 1600)
@@ -564,7 +844,7 @@ define(
                     //.attr('style', this.options.debug ? 'border : 1px solid blue' : undefined);
                     //.attr('style', 'width : 100%; height : 100%')
 
-                    d3.select('body').selectAll('.visToolTip')
+                    var tooltip = d3.select('body').selectAll('.visToolTip')
                         .data([0])
                         .enter()
                         .append('div')
@@ -588,22 +868,17 @@ define(
                                 'font-size': '12px',
                                 'line-height': '20px',
                             }
-                        )
-                        ;
+                        );
 
                     this.data('D3svg', D3svg);
-                }
-
-                //XXX D3svg is pointing to a reference to the parent's D3svg, but that might not yet exist. Which means that I need to rewire  everything
-                //to use a goddamn method instead. 
-
-                else {
+                } else {
+                    //XXX FUCK! D3svg is pointing to a reference to the parent's D3svg, but that might not yet exist. Which means that I need to rewire fucking everything
+                    //to use a goddamn method instead. Fuck my life.
                     this.$elem = this.options.parent.$elem;
                     this.width(this.$elem.width());
                     this.height(this.$elem.height());
                     D3svg = this.D3svg();
                 }
-
 
                 var regions = [
                     'chart', //add the chart first, because we want it to be at the lowest level.
@@ -779,8 +1054,8 @@ define(
             },
             chartBounds: function () {
 
-                var widgetWidth = this.width();
-                var widgetHeight = this.height();
+                var widgetWidth = this.$elem.width();
+                var widgetHeight = this.$elem.height();
 
                 var chart = new Rectangle(
                     new Point(this.xPadding(), this.yGutter()),
@@ -824,7 +1099,7 @@ define(
                         cx: 0,
                         cy: 0,
                         stopColor: this.options.radialGradientStopColor,
-                        r: this.chartBounds().size.width / 2,
+                        r: this.chartBounds().size.width / 2
                     },
                     grad
                     );
@@ -857,241 +1132,229 @@ define(
 
                 var newGrad = false;
 
+                //as brilliant as this hack is, it's also godawful. I might as well put a goto here.
+                //this just returns the grad's id, as usual. BUT it also invokes a side effect to set
+                //a global flag (well, enclosing context flag) to say that this is a newly created gradient
+                //so down below we don't use any transition time to set the values. There's gotta be a better
+                //way to do this, but I couldn't figure it out.
                 gradient
                     .enter()
                     .append('radialGradient')
                     .attr('id',
-                        /*
-                         as brilliant as this hack is, it's also godawful. I might as well put a goto here.
-                         this just returns the grad's id, as usual. BUT it also invokes a side effect to set
-                         a global flag (well, enclosing context flag) to say that this is a newly created gradient
-                         so down below we don't use any transition time to set the values. There's gotta be a better
-                         way to do this, but I couldn't figure it out.
-                         */
-                            function (d) {
-                                newGrad = true;
-                                return d.id;
-                            }
-                        )
-                            .attr('gradientUnits', 'userSpaceOnUse')
-                            .attr('cx', function (d) {
-                                return d.cx;
-                            })
-                            .attr('cy', function (d) {
-                                return d.cy;
-                            })
-                            .attr('r', function (d) {
-                                return 2.5 * d.r;
-                            })
-                            .attr('spreadMethod', 'pad')
-                            ;
-
-                        var transitionTime = newGrad
-                            ? 0
-                            : this.options.transitionTime;
-
-                        var stop0 = gradient.selectAll('stop[offset="0%"]').data([grad]);
-                        stop0.enter()
-                            .append('stop')
-                            .attr('offset', '0%');
-                        stop0.transition().duration(transitionTime)
-                            .attr('stop-color', function (d) {
-                                return d.startColor;
-                            });
-
-                        var stop30 = gradient.selectAll('stop[offset="30%"]').data([grad]);
-                        stop30.enter()
-                            .append('stop')
-                            .attr('offset', '30%')
-                            .attr('stop-opacity', 1);
-                        stop30.transition().duration(transitionTime)
-                            .attr('stop-color', function (d) {
-                                return d.startColor;
-                            });
-
-                        var stop70 = gradient.selectAll('stop[offset="70%"]').data([grad]);
-                        stop70.enter()
-                            .append('stop')
-                            .attr('stop-opacity', 1)
-                            .attr('offset', '70%');
-                        stop70.transition().duration(transitionTime)
-                            .attr('stop-color', function (d) {
-                                return d.stopColor;
-                            });
-
-                        return this.radialGradients()[gradKey] = grad.id;
-
-                    },
-                linearGradient: function (grad) {
-
-                    var chartBounds = this.chartBounds();
-
-                    grad = $.extend(
-                        true,
-                        {
-                            x1: 0, //chartBounds.origin.x,
-                            x2: 0, //chartBounds.size.width,
-                            y1: chartBounds.size.height, //chartBounds.origin.y,
-                            y2: 0,
-                            width: 0,
-                            height: chartBounds.size.height,
-                        },
-                        grad
-                        );
-
-                    var gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
-
-                    if (this.linearGradients()[gradKey] !== undefined && grad.id === undefined) {
-                        grad.id = this.linearGradients()[gradKey];
-                    }
-
-                    if (grad.id === undefined) {
-                        grad.id = this.uuid();
-                    }
-
-
-                    //I'd prefer to .select('.definitions').selectAll('linearGradient') and then just let
-                    //d3 figure out the one that appropriately maps to my given grad value...but I couldn't
-                    //get that to work for some inexplicable reason.
-                    var gradient = this.D3svg().select('.definitions').selectAll('#' + grad.id)
-                        .data([grad]);
-
-                    var newGrad = false;
-
-                    gradient
-                        .enter()
-                        .append('linearGradient')
-                        .attr('id',
-                            /*
-                             as brilliant as this hack is, it's also godawful. I might as well put a goto here.
-                             this just returns the grad's id, as usual. BUT it also invokes a side effect to set
-                             a global flag (well, enclosing context flag) to say that this is a newly created gradient
-                             so down below we don't use any transition time to set the values. There's gotta be a better
-                             way to do this, but I couldn't figure it out.
-                             */
-                                function (d) {
-                                    newGrad = true;
-                                    return d.id;
-                                }
-                            )
-                                .attr('gradientUnits', 'userSpaceOnUse')
-                                .attr('x1', function (d) {
-                                    return d.x1;
-                                })
-                                .attr('x2', function (d) {
-                                    return d.x2;
-                                })
-                                .attr('y1', function (d) {
-                                    return d.y1;
-                                })
-                                .attr('y2', function (d) {
-                                    return d.y2;
-                                })
-                                .attr('spreadMethod', 'pad')
-                                ;
-
-                            var transitionTime = newGrad
-                                ? 0
-                                : this.options.transitionTime;
-
-                            var gradStops = gradient.selectAll('stop').data(grad.colors);
-
-                            gradStops
-                                .enter()
-                                .append('stop')
-                                ;
-
-                            gradStops
-                                .transition().duration(transitionTime)
-                                .attr('offset', function (d, i) {
-                                    var num = 0;
-                                    if (i === grad.colors.length - 1) {
-                                        num = 1;
-                                    } else if (i > 0) {
-                                        num = i / (grad.colors.length - 1);
-                                    }
-
-                                    return (Math.round(10000 * num) / 100) + '%';
-                                })
-                                .attr('stop-color', function (d) {
-                                    return d;
-                                });
-
-
-                            return this.linearGradients()[gradKey] = grad.id;
-
-                        },
-                    wrap: function (text, width, xCoord) {
-
-                        if (xCoord === undefined) {
-                            xCoord = function () {
-                                return 0;
-                            };
+                        function (d) {
+                            newGrad = true;
+                            return d.id;
                         }
-                        ;
+                    )
+                    .attr('gradientUnits', 'userSpaceOnUse')
+                    .attr('cx', function (d) {
+                        return d.cx;
+                    })
+                    .attr('cy', function (d) {
+                        return d.cy;
+                    })
+                    .attr('r', function (d) {
+                        return 2.5 * d.r;
+                    })
+                    .attr('spreadMethod', 'pad');
+
+                var transitionTime = newGrad
+                    ? 0
+                    : this.options.transitionTime;
+
+                var stop0 = gradient.selectAll('stop[offset="0%"]').data([grad]);
+                stop0.enter()
+                    .append('stop')
+                    .attr('offset', '0%');
+                stop0.transition().duration(transitionTime)
+                    .attr('stop-color', function (d) {
+                        return d.startColor;
+                    });
+
+                var stop30 = gradient.selectAll('stop[offset="30%"]').data([grad]);
+                stop30.enter()
+                    .append('stop')
+                    .attr('offset', '30%')
+                    .attr('stop-opacity', 1);
+                stop30.transition().duration(transitionTime)
+                    .attr('stop-color', function (d) {
+                        return d.startColor;
+                    });
+
+                var stop70 = gradient.selectAll('stop[offset="70%"]').data([grad]);
+                stop70.enter()
+                    .append('stop')
+                    .attr('stop-opacity', 1)
+                    .attr('offset', '70%');
+                stop70.transition().duration(transitionTime)
+                    .attr('stop-color', function (d) {
+                        return d.stopColor;
+                    });
+
+                return this.radialGradients()[gradKey] = grad.id;
+
+            },
+            linearGradient: function (grad) {
+
+                var chartBounds = this.chartBounds();
+
+                grad = $.extend(
+                    true,
+                    {
+                        x1: 0, //chartBounds.origin.x,
+                        x2: 0, //chartBounds.size.width,
+                        y1: chartBounds.size.height, //chartBounds.origin.y,
+                        y2: 0,
+                        width: 0,
+                        height: chartBounds.size.height,
+                    },
+                    grad
+                    );
+
+                var gradKey = [grad.cx, grad.cy, grad.r, grad.startColor, grad.stopColor].join(',');
+
+                if (this.linearGradients()[gradKey] !== undefined && grad.id === undefined) {
+                    grad.id = this.linearGradients()[gradKey];
+                }
+
+                if (grad.id === undefined) {
+                    grad.id = this.uuid();
+                }
 
 
-                        text.each(function () {
-                            var text = d3.select(this),
-                                words = text.text().split(/\s+/).reverse(),
-                                word,
-                                line = [],
-                                lineNumber = 0,
-                                lineHeight = 1.1, // ems
-                                y = text.attr("y"),
-                                dy = parseFloat(text.attr("dy")) || 0,
-                                tspan = text
-                                .text(null)
-                                .append("tspan")
+                //I'd prefer to .select('.definitions').selectAll('linearGradient') and then just let
+                //d3 figure out the one that appropriately maps to my given grad value...but I couldn't
+                //get that to work for some inexplicable reason.
+                var gradient = this.D3svg().select('.definitions').selectAll('#' + grad.id)
+                    .data([grad]);
+
+                var newGrad = false;
+
+                //as brilliant as this hack is, it's also godawful. I might as well put a goto here.
+                //this just returns the grad's id, as usual. BUT it also invokes a side effect to set
+                //a global flag (well, enclosing context flag) to say that this is a newly created gradient
+                //so down below we don't use any transition time to set the values. There's gotta be a better
+                //way to do this, but I couldn't figure it out.
+                gradient
+                    .enter()
+                    .append('linearGradient')
+                    .attr('id',
+                        function (d) {
+                            newGrad = true;
+                            return d.id;
+                        }
+                    )
+                    .attr('gradientUnits', 'userSpaceOnUse')
+                    .attr('x1', function (d) {
+                        return d.x1;
+                    })
+                    .attr('x2', function (d) {
+                        return d.x2;
+                    })
+                    .attr('y1', function (d) {
+                        return d.y1;
+                    })
+                    .attr('y2', function (d) {
+                        return d.y2;
+                    })
+                    .attr('spreadMethod', 'pad');
+
+                var transitionTime = newGrad
+                    ? 0
+                    : this.options.transitionTime;
+
+                var gradStops = gradient.selectAll('stop').data(grad.colors);
+
+                gradStops
+                    .enter()
+                    .append('stop');
+
+                gradStops
+                    .transition().duration(transitionTime)
+                    .attr('offset', function (d, i) {
+                        var num = 0;
+                        if (i === grad.colors.length - 1) {
+                            num = 1;
+                        } else if (i > 0) {
+                            num = i / (grad.colors.length - 1)
+                        }
+
+                        return (Math.round(10000 * num) / 100) + '%';
+                    })
+                    .attr('stop-color', function (d) {
+                        return d
+                    });
+
+
+                return this.linearGradients()[gradKey] = grad.id;
+
+            },
+            wrap: function (text, width, xCoord) {
+
+                if (xCoord === undefined) {
+                    xCoord = function () {
+                        return 0;
+                    }
+                };
+
+                text.each(function () {
+                    var text = d3.select(this),
+                        words = text.text().split(/\s+/).reverse(),
+                        word,
+                        line = [],
+                        lineNumber = 0,
+                        lineHeight = 1.1, // ems
+                        y = text.attr("y"),
+                        dy = parseFloat(text.attr("dy")) || 0,
+                        tspan = text
+                        .text(null)
+                        .append("tspan")
+                        .attr("x", xCoord)
+                        .attr("y", y)
+                        .attr("dy", dy + "em");
+
+                    while (word = words.pop()) {
+                        line.push(word);
+                        tspan.text(line.join(" "));
+                        if (tspan.node().getComputedTextLength() > width) {
+                            line.pop();
+                            tspan.text(line.join(" "));
+                            line = [word];
+                            tspan = text.append("tspan")
                                 .attr("x", xCoord)
-                                .attr("y", y)
-                                .attr("dy", dy + "em")
-                                ;
-
-                            while (word = words.pop()) {
-                                line.push(word);
-                                tspan.text(line.join(" "));
-                                if (tspan.node().getComputedTextLength() > width) {
-                                    line.pop();
-                                    tspan.text(line.join(" "));
-                                    line = [word];
-                                    tspan = text.append("tspan")
-                                        .attr("x", xCoord)
-                                        .attr("y", y).
-                                        attr("dy", lineHeight + 'em')//++lineNumber * lineHeight + dy + "em")
-                                        .text(word)
-                                        ;
-                                }
-                            }
-                        });
-                    },
-                    absPos: function (obj) {
-
-                        var box = obj.getBBox();
-                        var matrix = obj.getScreenCTM();
-
-                        return {x: box.x + matrix.e, y: box.y + matrix.f};
-                    },
-                    endall: function (transition, callback) {
-                        var n = 0;
-                        transition
-                            .each(function () {
-                                ++n;
-                            })
-                            .each("end", function () {
-                                if (!--n)
-                                    callback.apply(this, arguments);
-                            });
-                    },
-                    uniqueness: function (uniqueFunc) {
-                        if (uniqueFunc === undefined) {
-                            uniqueFunc = this.uniqueID;
+                                .attr("y", y).
+                                attr("dy", lineHeight + 'em')//++lineNumber * lineHeight + dy + "em")
+                                .text(word);
                         }
-
-                        return this.options.useUniqueID
-                            ? uniqueFunc
-                            : undefined;
                     }
                 });
+            },
+            absPos: function (obj) {
 
+                var box = obj.getBBox();
+                var matrix = obj.getScreenCTM();
+
+                return {x: box.x + matrix.e, y: box.y + matrix.f};
+            },
+            endall: function (transition, callback) {
+                var n = 0;
+                transition
+                    .each(function () {
+                        ++n;
+                    })
+                    .each("end", function () {
+                        if (!--n)
+                            callback.apply(this, arguments);
+                    });
+            },
+            uniqueness: function (uniqueFunc) {
+                if (uniqueFunc === undefined) {
+                    uniqueFunc = this.uniqueID;
+                }
+
+                return this.options.useUniqueID
+                    ? uniqueFunc
+                    : undefined;
+            },
         });
+    });

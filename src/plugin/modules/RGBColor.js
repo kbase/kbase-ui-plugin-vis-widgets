@@ -1,11 +1,8 @@
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['jquery'],
+/*global define */
+/*jslint browser: true, white: true */
+define([
+    'jquery'
+],
     function ($) {
         'use strict';
         // A constructor.
@@ -30,7 +27,7 @@ define(['jquery'],
                 value: function () {
                     return new RGBColor(255 - this.r, 255 - this.g, 255 - this.b);
                 }
-            },            
+            },
             darkenBy: {
                 value: function (amount) {
                     var darker = new RGBColor(this.r, this.g, this.b);

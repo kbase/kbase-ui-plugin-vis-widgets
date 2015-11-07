@@ -1,7 +1,5 @@
-/*
- 
- */
-
+/*global define*/
+/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
@@ -186,7 +184,9 @@ define([
                             d3.select(this).attr('fill', $hm.options.overColor);
                             var d3this = d3.select(this);
 
-                            if (d3this.text() !== label) {
+                            if ($hm.options.labelOver) {
+                                $hm.options.labelOver.call(this, d);
+                            } else if (d3this.text() !== label) {
                                 $hm.showToolTip(
                                     {
                                         label: label
@@ -196,7 +196,12 @@ define([
                         })
                         .on('mouseout', function (d) {
                             d3.select(this).attr('fill', 'black');
-                            $hm.hideToolTip();
+
+                            if ($hm.options.labelOut) {
+                                $hm.options.labelOut.call(this, d);
+                            } else {
+                                $hm.hideToolTip();
+                            }
                         });
                 });
 
@@ -317,7 +322,7 @@ define([
 
                     var label = d3.select(this).text();
                     if (label.length > 23) {
-                        d3.select(this).text(label.substring(0, 20) + '...');
+                        d3.select(this).text(label.substring(0, 18) + '...');
                     }
 
                     var label_idx = $hm.dataset().row_labels.indexOf(label);
@@ -328,7 +333,9 @@ define([
                             d3.select(this).attr('fill', $hm.options.overColor);
                             var d3this = d3.select(this);
 
-                            if (d3this.text() !== label) {
+                            if ($hm.options.labelOver) {
+                                $hm.options.labelOver.call(this, d);
+                            } else if (d3this.text() !== label) {
                                 $hm.showToolTip(
                                     {
                                         label: label
@@ -338,8 +345,12 @@ define([
                         })
                         .on('mouseout', function (d) {
                             d3.select(this).attr('fill', 'black');
-                            $hm.hideToolTip();
-                        });
+                            if ($hm.options.labelOut) {
+                                $hm.options.labelOut.call(this, d);
+                            } else {
+                                $hm.hideToolTip();
+                            }
+                        })
                 });
 
             },
@@ -544,7 +555,6 @@ define([
                     .attr('fill', $hm.options.hmBGColor)
                     .attr('class', 'hmBG');
 
-
                 var oldStyleDataset = [];
 
                 var colorScale = this.colorScale();
@@ -566,11 +576,11 @@ define([
                 }
 
 
-                var chart = this.D3svg().select(this.region('chart')).selectAll('.cell').data(oldStyleDataset);
+                var chart = this.D3svg().select(this.region('chart')).selectAll('.davis-cell').data(oldStyleDataset);
                 chart
                     .enter()
                     .append('rect')
-                    .attr('class', 'cell')
+                    .attr('class', 'davis-cell')
                     ;
 
                 chart
@@ -587,8 +597,6 @@ define([
                     .data(oldStyleDataset)
                     .exit()
                     .remove();
-
-
             }
         });
 

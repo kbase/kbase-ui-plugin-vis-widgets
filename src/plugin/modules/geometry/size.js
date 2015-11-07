@@ -1,16 +1,10 @@
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
+/*global  define */
+/*jslint browser: true,  white: true */
 define([],
     function () {
-
         'use strict';
 
-        function Size (width, height) {
+        function Size(width, height) {
             this.width = width;
             this.height = height;
         }

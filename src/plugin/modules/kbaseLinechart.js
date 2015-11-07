@@ -1,7 +1,5 @@
-/*
- 
- */
-
+/*global define*/
+/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
@@ -9,12 +7,15 @@ define([
 ],
     function ($, d3) {
         'use strict';
+
         $.KBWidget({
             name: "kbaseLinechart",
             parent: "kbaseVisWidget",
             version: "1.0.0",
             options: {
                 overColor: 'yellow',
+                useOverLine: true,
+                useLineLabelToolTip: true,
                 lineWidth: 3,
                 lineCap: 'round',
                 strokeColor: 'black',
@@ -24,14 +25,33 @@ define([
                 xIncrementor: function (xIdx) {
                     return xIdx !== undefined ? xIdx + 1 : 0;
                 },
+                useHighlightLine: true,
                 highlightLineColor: 'red',
                 highlightLineWidth: 1,
-                useHighlightLine: true
+                shapeArea: 64,
+                xInset: 0.1,
+                yInset: 0.1
             },
             _accessors: [
             ],
-            setDataset: function (dataset) {
+            extractLegend: function (dataset) {
 
+                var legend = [];
+                dataset.forEach(
+                    function (line, idx) {
+                        legend.push(
+                            {
+                                color: line.strokeColor,
+                                label: line.label,
+                                shape: line.shape
+                            }
+                        );
+                    }
+                );
+
+                this.setLegend(legend);
+            },
+            setDataset: function (dataset) {
                 var $line = this;
 
                 dataset.forEach(
@@ -50,12 +70,17 @@ define([
                                 var point = line.values[i];
 
                                 if (!$.isPlainObject(point)) {
-                                    line.values[i] = {x: xIdx, y: point}
+                                    line.values[i] = {x: xIdx, y: point};
                                     xIdx = xInc(xIdx);
                                 } else {
-                                    xIdx = xInc(point.x);
+                                    if (point.x) {
+                                        xIdx = xInc(point.x);
+                                    } else {
+                                        point.x = xIdx;
+                                    }
                                     if (point.y2) {
-                                        revLine.push({x: point.x, y: point.y2})
+                                        revLine.push({x: point.x, y: point.y2});
+                                        delete point.y2;
                                     }
                                 }
                             }
@@ -74,14 +99,12 @@ define([
                 this._super(dataset);
             },
             defaultXDomain: function () {
-
                 if (this.dataset() === undefined) {
                     return [0, 0];
                 }
 
-
-                return [
-                    0.9 * d3.min(
+                var ret = [
+                    d3.min(
                         this.dataset(),
                         function (l) {
                             return d3.min(l.values.map(function (d) {
@@ -89,7 +112,7 @@ define([
                             }));
                         }
                     ),
-                    1.1 * d3.max(
+                    d3.max(
                         this.dataset(),
                         function (l) {
                             return d3.max(l.values.map(function (d) {
@@ -98,6 +121,13 @@ define([
                         }
                     )
                 ];
+
+                var delta = Math.max(this.options.xInset * ret[0], this.options.xInset * ret[1]);
+                ret[0] -= delta;
+                ret[1] += delta;
+
+                return ret;
+
             },
             defaultYDomain: function () {
 
@@ -105,8 +135,8 @@ define([
                     return [0, 0];
                 }
 
-                return [
-                    0.9 * d3.min(
+                var ret = [
+                    d3.min(
                         this.dataset(),
                         function (l) {
                             return d3.min(l.values.map(function (d) {
@@ -114,7 +144,7 @@ define([
                             }));
                         }
                     ),
-                    1.1 * d3.max(
+                    d3.max(
                         this.dataset(),
                         function (l) {
                             return d3.max(l.values.map(function (d) {
@@ -123,6 +153,12 @@ define([
                         }
                     )
                 ];
+
+                var delta = Math.max(this.options.yInset * ret[0], this.options.yInset * ret[1]);
+                ret[0] -= delta;
+                ret[1] += delta;
+
+                return ret;
             },
             renderChart: function () {
 
@@ -167,14 +203,17 @@ define([
                         })
                         .attr('stroke-dasharray', function (d) {
                             return d.dasharray;
-                        })
-                        ;
+                        });
 
                     return this;
 
                 };
 
                 var mouseAction = function () {
+
+                    if (!$line.options.useOverLine) {
+                        return;
+                    }
 
                     this.on('mouseover', function (d) {
                         if ($line.options.overColor) {
@@ -183,7 +222,7 @@ define([
                                 .attr('stroke-width', (d.width || $line.options.lineWidth) + 5);
                         }
 
-                        if (d.label) {
+                        if (d.label && $line.options.useLineLabelToolTip) {
                             $line.showToolTip(
                                 {
                                     label: d.label
@@ -202,7 +241,9 @@ define([
                                         return d.width !== undefined ? d.width : $line.options.lineWidth;
                                     });
 
-                                $line.hideToolTip();
+                                if ($line.options.useLineLabelToolTip) {
+                                    $line.hideToolTip();
+                                }
 
                             }
                         });
@@ -231,52 +272,110 @@ define([
                     gyAxis.selectAll('line').style('stroke', 'lightgray');
                 }
 
-                var chart = this.data('D3svg').select(this.region('chart')).selectAll('.line').data(this.dataset());
+                var chart = this.data('D3svg').select(this.region('chart')).selectAll('.line').data(this.dataset(), function (d) {
+                    return d.label;
+                });
 
                 chart
                     .enter()
                     .append('path')
                     .attr('class', 'line')
                     .call(funkyTown)
-                    .call(mouseAction)
-                    ;
+                    .call(mouseAction);
 
                 chart
                     .call(mouseAction)
                     .transition()
                     .duration(this.options.transitionTime)
-                    .call(funkyTown)
-                    ;
+                    .call(funkyTown);
 
                 chart
                     .exit()
                     .remove();
 
-                for (var i = 0; i < this.dataset().length; i++) {
+                var time = $line.linesDrawn ? $line.options.transitionTime : 0;
 
-                    var line = this.dataset()[i];
+                var pointsData = [];
+                this.dataset().forEach(function (line, i) {
 
-                    if (line.shape === undefined) {
-                        continue;
-                    }
+                    line.values.forEach(function (point, i) {
+                        if (line.shape || point.shape) {
+                            var newPoint = {};
+                            for (var key in point) {
+                                newPoint[key] = point[key];
+                            }
 
-                    var points = this.data('D3svg').select(this.region('chart')).selectAll('.point-' + line.label).data(line.values);
+                            newPoint.color = point.color || line.fillColor || line.strokeColor || $line.options.fillColor;
+                            newPoint.shape = point.shape || line.shape;
+                            newPoint.shapeArea = point.shapeArea || line.shapeArea || $line.options.shapeArea,
+                                newPoint.pointOver = point.pointOver || line.pointOver || $line.options.pointOver,
+                                newPoint.pointOut = point.pointOut || line.pointOut || $line.options.pointOut,
+                                newPoint.id = [point.x, point.y, line.label].join('/'),
+                                pointsData.push(newPoint);
+                        }
+                    });
+                });
 
-                    points
-                        .enter()
-                        .append('path')
-                        .attr('class', 'point')
-                        .attr("transform", function (d) {
-                            return "translate(" + $line.xScale()(d.x) + "," + $line.yScale()(d.y) + ")";
-                        })
-                        .attr('d', function (d) {
-                            return d3.svg.symbol().type(line.shape).size(line.shapeArea)();
-                        })
-                        .attr('fill', function (d) {
-                            return line.fillColor || line.strokeColor || $line.options.fillColor;
-                        })
-                        ;
-                }
+                var points = $line.data('D3svg').select($line.region('chart')).selectAll('.point').data(pointsData, function (d) {
+                    return d.id;
+                });
+
+                points.enter()
+                    .append('path')
+                    .attr('class', 'point')
+                    .attr('opacity', 0)
+                    .attr("transform", function (d) {
+                        return "translate(" + $line.xScale()(d.x) + "," + $line.yScale()(d.y) + ")";
+                    })
+                    .on('mouseover', function (d) {
+
+                        if ($line.options.overColor) {
+                            d3.select(this)
+                                .attr('fill', $line.options.overColor);
+                        }
+
+                        if (d.label) {
+                            $line.showToolTip(
+                                {
+                                    label: d.label
+                                }
+                            );
+                        } else if (d.pointOver) {
+                            d.pointOver.call($line, d);
+                        }
+                    })
+                    .on('mouseout', function (d) {
+                        if ($line.options.overColor) {
+                            d3.select(this)
+                                .attr('fill', function (d) {
+                                    return d.color;
+                                });
+                        }
+
+                        if (d.label) {
+                            $line.hideToolTip();
+                        } else if (d.pointOut) {
+                            d.pointOut.call($line, d);
+                        }
+                    });
+
+                points
+                    .transition().duration(time)
+                    .attr("transform", function (d) {
+                        return "translate(" + $line.xScale()(d.x) + "," + $line.yScale()(d.y) + ")";
+                    })
+                    .attr('d', function (d) {
+                        return d3.svg.symbol().type(d.shape).size(d.shapeArea)();
+                    })
+                    .attr('fill', function (d) {
+                        return d.color;
+                    })
+                    .attr('opacity', 1);
+
+                points.exit()
+                    .transition().duration(time)
+                    .attr('opacity', 0)
+                    .remove();
 
                 if (this.options.useHighlightLine) {
                     var highlight = this.data('D3svg').select(this.region('chart')).selectAll('.highlight').data([0]);
@@ -290,6 +389,7 @@ define([
                         .attr('opacity', 0)
                         .attr('stroke', this.options.highlightLineColor)
                         .attr('stroke-width', this.options.highlightLineWidth)
+                        .attr('pointer-events', 'none')
                         ;
 
                     this.data('D3svg').select(this.region('chart'))
@@ -305,14 +405,14 @@ define([
                         })
                         .on('mouseout', function (d) {
                             highlight.attr('opacity', 0);
-                        })
-                        ;
+                        });
                 }
+
+                this.linesDrawn = true;
 
             },
             setYScaleRange: function (range, yScale) {
                 return this._super(range.reverse(), yScale);
             }
         });
-
     });

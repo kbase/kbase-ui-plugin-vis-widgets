@@ -1,19 +1,15 @@
-/*
- 
- */
-
-define(
-    [
-        'jquery',
-        'd3',
-        'kb_vis_widget',
-        'kb_vis_rgbColor',
-        'kb_vis_rectangle',
-        'kb_vis_point',
-        'kb_vis_size',
-        'kb_vis_piechart',
-    ], function ($) {
-
+/*global define*/
+/*jslint white: true, browser: true */
+define([
+    'jquery',
+    'd3',
+    'kb_vis_visWidget',
+    'kb_vis_RGBColor',
+    'kb_vis_rectangle',
+    'kb_vis_point',
+    'kb_vis_size',
+    'kb_vis_piechart'
+], function ($, d3) {
     'use strict';
 
     $.KBWidget({
@@ -35,7 +31,7 @@ define(
             sortSubgroups: d3.descending,
             chordColorScale: function (idx, data, $chord) {
                 return $chord.options.colorScale(idx, data, $chord);
-            },
+            }
         },
         _accessors: [
             'calculatedPieData'
@@ -54,43 +50,38 @@ define(
                 if (idx < this.lastChordData.length - 1) {
                     return {
                         source: {startAngle: this.lastChordData[idx + 1].source.startAngle, endAngle: this.lastChordData[idx + 1].source.startAngle},
-                        target: {startAngle: this.lastChordData[idx + 1].target.startAngle, endAngle: this.lastChordData[idx + 1].target.startAngle},
-                    }
+                        target: {startAngle: this.lastChordData[idx + 1].target.startAngle, endAngle: this.lastChordData[idx + 1].target.startAngle}
+                    };
                 } else {
                     return {
                         source: {startAngle: this.options.endAngle, endAngle: this.options.endAngle},
-                        target: {startAngle: this.options.endAngle, endAngle: this.options.endAngle},
-                    }
-
+                        target: {startAngle: this.options.endAngle, endAngle: this.options.endAngle}
+                    };
                 }
             }
 
             //the first line animates the wedges in place, the second animates from the top, the third draws them rendered
-            else if (this.options.startingPosition == 'slice') {
+            else if (this.options.startingPosition === 'slice') {
                 return {
                     source: {startAngle: d.source.startAngle, endAngle: d.source.startAngle},
-                    target: {startAngle: d.target.startAngle, endAngle: d.target.startAngle},
+                    target: {startAngle: d.target.startAngle, endAngle: d.target.startAngle}
                 };
-            } else if (this.options.startingPosition == 'top') {
+            } else if (this.options.startingPosition === 'top') {
                 return {
                     source: {startAngle: this.options.startAngle, endAngle: this.options.startAngle},
-                    target: {startAngle: this.options.startAngle, endAngle: this.options.startAngle},
-                }
-            } else if (this.options.startingPosition == 'final') {
+                    target: {startAngle: this.options.startAngle, endAngle: this.options.startAngle}
+                };
+            } else if (this.options.startingPosition === 'final') {
                 return {
                     source: {startAngle: d.source.startAngle, endAngle: d.source.endAngle},
-                    target: {startAngle: d.target.startAngle, endAngle: d.target.endAngle},
-                }
+                    target: {startAngle: d.target.startAngle, endAngle: d.target.endAngle}
+                };
             }
 
         },
         sliceAction: function ($chord) {
-
             var superMethod = $.KBWidget.registry()[$chord.parent].prototype['sliceAction'];
-
             superMethod = superMethod.call(this, $chord);
-
-            ;
 
             return function () {
                 this.call(superMethod);
@@ -98,7 +89,6 @@ define(
             };
         },
         renderChart: function () {
-
             var bounds = this.chartBounds();
             var $chord = this;
 
@@ -170,7 +160,7 @@ define(
                                         endAngle: endAngle,
                                         index: val.index,
                                         value: val.value,
-                                        data: newData,
+                                        data: newData
                                     }
                                 );
 
@@ -233,7 +223,7 @@ define(
                     function (val, idx) {
                         //function (idx, val) {
 
-                        newVal = $.extend(true, {}, val);
+                        var newVal = $.extend(true, {}, val);
                         newVal.data = {};
 
                         newVal.source.startAngle += $chord.options.startAngle;
@@ -259,7 +249,7 @@ define(
                     this
                         .attr('fill-opacity', .67)
                         .attr("fill", function (d, idx) {
-                            return d.data.color || $chord.options.colorScale(d.data.colorIdx, d.data, $chord)
+                            return d.data.color || $chord.options.colorScale(d.data.colorIdx, d.data, $chord);
                         })
                         .attr('stroke', 'black')
                         .attr('stroke-width', .5)
@@ -273,7 +263,7 @@ define(
                         this
                             .attrTween("d", function (d, idx) {
 
-                                if (this._current == undefined) {
+                                if (this._current === undefined) {
                                     this._current = $chord.startingChordPosition(d, idx);
                                 }
 
@@ -291,7 +281,7 @@ define(
                     return this;
                 };
 
-                var transitionTime = this.initialized || this.options.startingPosition != 'final'
+                var transitionTime = this.initialized || this.options.startingPosition !== 'final'
                     ? this.options.transitionTime
                     : 0;
 
@@ -326,7 +316,7 @@ define(
             //all ticks and labels go into a single group. Set that up.
             var tickG = this.data('D3svg').select(this.region('chart')).selectAll('.ticks').data([0]);
             tickG.enter().insert('g', '.labelG')
-                .attr('class', 'ticks')
+                .attr('class', 'ticks');
             tickG
                 .attr('transform',
                     'translate('
@@ -349,7 +339,7 @@ define(
 
             tickArcs.exit().transition().duration(transitionTime).attr('opacity', 0)
                 .each('end', function (d) {
-                    d3.select(this).remove()
+                    d3.select(this).remove();
                 })
                 ;
             //.remove();
@@ -362,7 +352,7 @@ define(
             tickGs.exit()
                 .transition().duration(transitionTime).attr('opacity', 0)
                 .each('end', function (d) {
-                    d3.select(this).remove()
+                    d3.select(this).remove();
                 })
                 ;
             //.remove();
@@ -377,7 +367,7 @@ define(
             tickGs
                 .transition().duration(transitionTime)
                 .attrTween('transform', function (d, idx) {
-                    if (this._current == undefined) {
+                    if (this._current === undefined) {
                         this._current = $chord.startingChordPosition(d, idx);
                     }
 
@@ -387,7 +377,7 @@ define(
                         var d2 = interpolate(t);
                         return "rotate(" + (d2.angle * 180 / Math.PI - 90) + ")"
                             + "translate(" + outerRadius + ",0)";
-                    }
+                    };
                 });
 
             tickGs.select('line')
@@ -397,7 +387,7 @@ define(
                 .attr("y2", 0)
                 .style("stroke", "#000")
                 .attr('stroke-opacity', function (d) {
-                    return d3.select(this).attr('stroke-opacity') || 0
+                    return d3.select(this).attr('stroke-opacity') || 0;
                 });
             tickGs.select('line').transition().duration(transitionTime).attr('stroke-opacity', 1);
 
@@ -414,7 +404,7 @@ define(
                     return d.label;
                 })
                 .attr('opacity', function (d) {
-                    return d3.select(this).attr('opacity') || 0
+                    return d3.select(this).attr('opacity') || 0;
                 });
             tickGs.select('text').transition().duration(transitionTime).attr('opacity', 1);
 
@@ -432,9 +422,9 @@ define(
 
             function fade(opacity) {
                 return function (g, i) {
-                    chord.selectAll(".chord path")
+                    $chord.selectAll(".chord path")
                         .filter(function (d) {
-                            return d.source.index != i && d.target.index != i;
+                            return d.source.index !== i && d.target.index !== i;
                         })
                         .transition()
                         .style("opacity", opacity);
@@ -443,7 +433,7 @@ define(
 
         },
         renderXAxis: function () {},
-        renderYAxis: function () {},
+        renderYAxis: function () {}
     });
 
 });

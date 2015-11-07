@@ -1,18 +1,11 @@
-/*
- 
- */
+/*global define*/
+/*jslint white: true, browser: true*/
 
-define(
-    [
-        'jquery',
-        'd3',
-        'kb_vis_widget',
-        'kb_vis_rgbColor',
-        'kb_vis_rectangle',
-        'kb_vis_point',
-        'kb_vis_size',
-    ], function ($) {
-
+define([
+    'jquery',
+    'd3',
+    'kb_vis_visWidget'
+], function ($, d3) {
     'use strict';
 
     $.KBWidget({
@@ -46,25 +39,30 @@ define(
             draggable: true,
             tooltips: true,
             rescaleChildren: true,
+            outerRadiusInset: 10
         },
         _accessors: [
         ],
         init: function (options) {
             this._super(options);
 
-            if (this.options.endAngle == undefined) {
+            if (this.options.endAngle === undefined) {
                 this.options.endAngle = this.options.startAngle + 2 * Math.PI;
             }
 
             this.pieSize = this.options.endAngle - this.options.startAngle;
 
             this.uniqueID = $.proxy(function (d) {
-                if (d.data == undefined) {
+                if (d.data === undefined) {
                     d.data = {};
                 }
                 var ret = d.data.id || (d.data.id = this.ticker());
                 return ret;
             }, this);
+
+            if (this.parent !== undefined) {
+                this.outerRadiusInset = 0;
+            }
 
             return this;
         },
@@ -98,11 +96,11 @@ define(
             }
 
             //the first line animates the wedges in place, the second animates from the top, the third draws them rendered
-            else if (this.options.startingPosition == 'slice') {
+            else if (this.options.startingPosition === 'slice') {
                 return {startAngle: d.startAngle, endAngle: d.startAngle};
-            } else if (this.options.startingPosition == 'top') {
+            } else if (this.options.startingPosition === 'top') {
                 return {startAngle: this.options.startAngle, endAngle: this.options.startAngle};
-            } else if (this.options.startingPosition == 'final') {
+            } else if (this.options.startingPosition === 'final') {
                 return {startAngle: d.startAngle, endAngle: d.endAngle};
             }
 
@@ -125,16 +123,16 @@ define(
             // logic is:
             // if the global flag is set to true AND we haven't overridden it, then we use them outside
             // otherwise, if we have set a local value, then that has to be true, regardless of the global flag
-            return (this.options.outsideLabels && d.data.outsideLabel == undefined) || d.data.outsideLabel;
+            return (this.options.outsideLabels && d.data.outsideLabel === undefined) || d.data.outsideLabel;
         },
         setDataset: function (newDataset) {
 
-            if (newDataset != undefined) {
+            if (newDataset !== undefined) {
                 $.each(
                     newDataset,
                     function (idx, val) {
 
-                        if (typeof val == 'number') {
+                        if (typeof val === 'number') {
                             newDataset[idx] = {value: val};
                         }
                     }
@@ -180,7 +178,7 @@ define(
         sliceAction: function ($pie) {
 
             return function () {
-                var radius = $pie.outerRadius();
+                var radius = $pie.outerRadius() - $pie.options.outerRadiusInset;
 
                 var outerArcMaker = d3.svg.arc()
                     .innerRadius(radius)
@@ -203,15 +201,14 @@ define(
                         .duration(0)
                         .attr('fill-opacity', $pie.options.outerArcOpacity)
                         .attr('fill', function (d2, idx) {
-                            return d.data.color || $pie.options.colorScale(idx, d.data, $pie)
+                            return d.data.color || $pie.options.colorScale(idx, d.data, $pie);
                         })
                         .attr('transform', function (d2) {
-                            return d3.select(slice).attr('transform')
+                            return d3.select(slice).attr('transform');
                         })
                         .attr('d', function (d2) {
                             return outerArcMaker({startAngle: d.startAngle, endAngle: d.endAngle});
-                        })
-                        ;
+                        });
 
                     var coordinates = [0, 0];
                     coordinates = d3.mouse(this);
@@ -255,12 +252,12 @@ define(
                     })
                     ;
                 return this;
-            }
+            };
         },
         tooltip: function (d) {
-            if (d.data.tooltip != undefined) {
+            if (d.data.tooltip !== undefined) {
                 return d.data.tooltip;
-            } else if (d.data.label != undefined) {
+            } else if (d.data.label !== undefined) {
                 return d.data.label + ' : ' + d.data.value;
             } else {
                 return undefined;
@@ -279,17 +276,17 @@ define(
         },
         renderChart: function () {
 
-            if (this.dataset() == undefined) {
+            if (this.dataset() === undefined) {
                 return;
             }
 
-            if (this.dataset().length == 0) {
+            if (this.dataset().length === 0) {
                 this.initialized = false;
                 this.lastPieData = undefined;
             }
 
             var startingOpacity = 0;
-            if (this.options.startingPosition == 'final') {
+            if (this.options.startingPosition === 'final') {
                 startingOpacity = 1;
             }
 
@@ -316,7 +313,7 @@ define(
 
             var pieData = this.pieData($pie.dataset());
 
-            var radius = this.outerRadius();
+            var radius = this.outerRadius() - this.options.outerRadiusInset;
             var innerRadius = this.innerRadius();
 
             var arcMaker = d3.svg.arc()
@@ -343,7 +340,7 @@ define(
 
                 this
                     .attr('transform', function (d, idx) {
-                        if (d.data.offset == undefined) {
+                        if (d.data.offset === undefined) {
                             return;
                         }
 
@@ -357,10 +354,10 @@ define(
 
                     })
                     .attr('fill-opacity', function (d) {
-                        return d.data.gap ? 0 : 1
+                        return d.data.gap ? 0 : 1;
                     })
                     .attr('stroke-opacity', function (d) {
-                        return d.data.gap ? 0 : 1
+                        return d.data.gap ? 0 : 1;
                     })
                     ;
 
@@ -368,11 +365,11 @@ define(
                 if (!$pie.options.gradient) {
                     this.attr('fill', function (d, idx) {
 
-                        if (d.data.color == undefined) {
+                        if (d.data.color === undefined) {
                             d.data.color = $pie.options.colorScale(idx, d.data, $pie);
                         }
 
-                        return d.data.color
+                        return d.data.color;
                     });
                 }
 
@@ -384,19 +381,19 @@ define(
                                 function (d, idx) {
                                     var uniqueFunc = $pie.uniqueness();
 
-                                    var currentID = uniqueFunc == undefined
+                                    var currentID = uniqueFunc === undefined
                                         ? undefined
                                         : uniqueFunc(d);
 
                                     var gradID = d.data.gradID;
-                                    if (gradID == undefined) {
+                                    if (gradID === undefined) {
 
                                         var newGradID;
-                                        if ($pie.lastPieData != undefined && idx < $pie.lastPieData.length) {
+                                        if ($pie.lastPieData !== undefined && idx < $pie.lastPieData.length) {
 
 
                                             //no id? we're using indexes. Easy.
-                                            if (currentID == undefined) {
+                                            if (currentID === undefined) {
                                                 newGradID = $pie.lastPieData[idx].data.gradID;
                                             }
                                             //id? Shit. Iterate and look up by the id
@@ -405,7 +402,7 @@ define(
                                                     $pie.lastPieData,
                                                     function (idx, val) {
                                                         var lastID = uniqueFunc(val);
-                                                        if (lastID == currentID) {
+                                                        if (lastID === currentID) {
                                                             newGradID = val.data.gradID;
                                                             return;
                                                         }
@@ -415,7 +412,7 @@ define(
 
                                         }
 
-                                        if (newGradID == undefined) {
+                                        if (newGradID === undefined) {
                                             newGradID = $pie.uuid();
                                         }
 
@@ -424,7 +421,7 @@ define(
 
                                     var gradient = d.data.color;
 
-                                    if (d.data.color == undefined) {
+                                    if (d.data.color === undefined) {
                                         d.data.color = $pie.options.colorScale(idx, d.data, $pie);
                                     }
 
@@ -439,10 +436,10 @@ define(
                                         ) + ')';
 
                                     return function (t) {
-                                        return gradient
+                                        return gradient;
                                     };
                                 }
-                            )//*/
+                            );
                     }
                     this
                         .attrTween("d", function (d, idx) {
@@ -450,7 +447,7 @@ define(
                             //this._current = this._current || d;//{startAngle : this.options.startAngle, endAngle : this.options.startAngle};
                             //this._current = this._current || {startAngle : d.startAngle, endAngle : d.startAngle};
 //$pie.lastPieData = pieData;
-                            if (this._current == undefined) {
+                            if (this._current === undefined) {
 
                                 this._current = $pie.startingPosition(d, idx);
                             }
@@ -472,15 +469,12 @@ define(
 
             };
 
-            var labelTown = function (opacity) {
-
-                if (opacity == undefined) {
+            var labelTown = function labelTown(opacity) {
+                if (opacity === undefined) {
                     opacity = 1;
                 }
 
-                this
-                    .attr("text-anchor", "middle")
-                    ;
+                this.attr("text-anchor", "middle");
 
                 if (this.attrTween) {
 
@@ -489,7 +483,7 @@ define(
                             return d.data.label;
                         })
                         .attrTween('fill-opacity', function (d, idx) {
-                            if (this._currentOpacity == undefined) {
+                            if (this._currentOpacity === undefined) {
                                 this._currentOpacity = $pie.initialized ? 0 : startingOpacity;
                             }
                             var interpolate = d3.interpolate(this._currentOpacity, opacity);
@@ -497,16 +491,16 @@ define(
                             var $me = this;
                             return function (t) {
                                 return $me._currentOpacity = interpolate(t);
-                            }
+                            };
                         })
                         .attrTween("transform", function (d, idx) {
                             //this._current=  this._current || d;
-                            if (this._current == undefined) {
+                            if (this._current === undefined) {
                                 this._current = $pie.startingPosition(d, idx);
                             }
 
                             var endPoint = d;
-                            if (opacity == 0) {
+                            if (opacity === 0) {
                                 endPoint = {startAngle: d.startAngle, endAngle: d.startAngle};
                                 if (idx > 0 && pieData.length) {
                                     if (idx > pieData.length) {
@@ -530,7 +524,8 @@ define(
                                 var d2 = interpolate(t);
                                 var pos = myArcMaker.centroid(d2);
                                 if (useOutsideLabels) {
-                                    pos[0] = radius * 1.05 * $pie.midPosition(d2);
+                                    pos[0] = radius * 1.06 * $pie.midPosition(d2);
+                                    pos[1] += 2;
                                 }
                                 return "translate(" + pos + ")";
                             };
@@ -556,7 +551,7 @@ define(
 
 
                 return this;
-            }
+            };
 
             var drag = d3.behavior.drag();
 
@@ -600,7 +595,7 @@ define(
             //there is no mouse action on a pie chart for now.
 
             var labelAction = function () {
-                return this
+                return this;
             };
 
             var pie = this.D3svg().select(this.region('chart')).selectAll('.pie').data([0]);
@@ -616,13 +611,13 @@ define(
             $.each(
                 pieData,
                 function (idx, val) {
-                    if (val.data.id != undefined) {
+                    if (val.data.id !== undefined) {
                         val.id = val.data.id;
                     }
                 }
             );
 
-            if ($pie.options.pieColor != undefined) {
+            if ($pie.options.pieColor !== undefined) {
                 var chartSelection = this.D3svg().select(this.region('chart')).data([0]);
 
                 var pieBG = chartSelection.selectAll('.pieBG').data([0]);
@@ -642,7 +637,7 @@ define(
                         + ')'
                         )
                     .attr('d', function (d) {
-                        return pieMaker({startAngle: 0, endAngle: 2 * Math.PI})
+                        return pieMaker({startAngle: 0, endAngle: 2 * Math.PI});
                     })
                     ;
                 pieBG
@@ -665,10 +660,10 @@ define(
                 .append('path')
                 .attr('class', 'slice')
                 .attr('fill', function (d, idx) {
-                    if (d.data.color == undefined) {
+                    if (d.data.color === undefined) {
                         d.data.color = $pie.options.colorScale(idx, d.data, $pie);
                     }
-                    return d.data.color
+                    return d.data.color;
                 })
                 .attr('stroke', $pie.options.strokeColor)
                 .attr('stroke-width', $pie.options.strokeWidth)
@@ -676,7 +671,7 @@ define(
                 //.call(funkyTown);
                 ;
 
-            var transitionTime = this.initialized || this.options.startingPosition != 'final'
+            var transitionTime = this.initialized || this.options.startingPosition !== 'final'
                 ? this.options.transitionTime
                 : 0;
 
@@ -717,7 +712,7 @@ define(
                     };
                 })
                 .each('end', function (d) {
-                    d3.select(this).remove()
+                    d3.select(this).remove();
                 })
                 ;
 
@@ -737,55 +732,50 @@ define(
                     pieData.filter(function (d) {
                         return (
                             ($pie.options.labels || d.data.forceLabel)
-                            && d.data.label != undefined
+                            && d.data.label !== undefined
                             && d.data.label.length
-                            )
+                            );
                     }),
                     this.uniqueness()
-                    )
-
-                ;
+                    );
 
             labels
                 .enter()
                 .append('text')
                 .attr('class', 'label')
                 .call(function () {
-                    labelTown.call(this, 1)
-                })
-                ;
+                    labelTown.call(this, 1);
+                });
 
             labels
                 .call(labelAction)
                 .transition()
                 .duration(transitionTime)
                 .call(function () {
-                    labelTown.call(this, 1)
-                })
-                ;
+                    labelTown.call(this, 1);
+                });
 
             labels
                 .exit()
                 .transition()
                 .duration(transitionTime)
                 .call(function () {
-                    labelTown.call(this, 0)
+                    labelTown.call(this, 0);
                 })
                 .each('end', function (d) {
-                    d3.select(this).remove()
-                })
-                ;
+                    d3.select(this).remove();
+                });
 
             var lineTown = function (opacity) {
 
-                if (opacity == undefined) {
+                if (opacity === undefined) {
                     opacity = 1;
                 }
 
                 if (this.attrTween) {
                     this
                         .attrTween('stroke-opacity', function (d, idx) {
-                            if (this._currentOpacity == undefined) {
+                            if (this._currentOpacity === undefined) {
                                 this._currentOpacity = $pie.initialized ? 0 : startingOpacity;
                             }
                             var interpolate = d3.interpolate(this._currentOpacity, opacity);
@@ -793,13 +783,13 @@ define(
                             var $me = this;
                             return function (t) {
                                 return $me._currentOpacity = interpolate(t);
-                            }
+                            };
                         })
                         .attrTween("points", function (d, idx) {
                             this._current = this._current || $pie.startingPosition(d, idx);
 
                             var endPoint = d;
-                            if (opacity == 0) {
+                            if (opacity === 0) {
                                 endPoint = {startAngle: d.startAngle, endAngle: d.startAngle};
                                 if (idx > 0 && pieData.length) {
                                     if (idx > pieData.length) {
@@ -840,9 +830,9 @@ define(
                         return (
                             ($pie.options.labels || d.data.forceLabel)
                             && ($pie.options.outsideLabels || d.data.outsideLabel)
-                            && d.data.label != undefined
+                            && d.data.label !== undefined
                             && d.data.label.length
-                            )
+                            );
                     })
                     ,
                     this.uniqueness()
@@ -853,32 +843,29 @@ define(
                 .append('polyline')
                 .attr('stroke', 'black')
                 .attr('stroke-width', 1)
-                .attr('fill', 'rgba(0,0,0,0)')
-                ;
+                .attr('fill', 'rgba(0,0,0,0)');
 
             lines
                 .transition()
                 .duration(transitionTime)
                 .call(function () {
-                    lineTown.call(this, 1)
-                })
-                ;
+                    lineTown.call(this, 1);
+                });
 
             lines
                 .exit()
                 .transition()
                 .duration(transitionTime)
                 .call(function () {
-                    lineTown.call(this, 0)
+                    lineTown.call(this, 0);
                 })
                 .each('end', function (d) {
-                    d3.select(this).remove()
-                })
-                ;
+                    d3.select(this).remove();
+                });
 
         },
         renderXAxis: function () {},
-        renderYAxis: function () {},
+        renderYAxis: function () {}
     });
 
 });

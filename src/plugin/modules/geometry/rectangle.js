@@ -1,58 +1,54 @@
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['kb_vis_point', 'kb_vis_size'],
+/*global define */
+/*jslint browser: true, white: true */
+define([
+    'kb_vis_point',
+    'kb_vis_size'
+],
     function (Point, Size) {
-
         'use strict';
 
-        function Rectangle(origin,size) {
-            if (origin == undefined) {
-                origin = new Point(-1,-1);
+        function Rectangle(origin, size) {
+            if (origin === undefined) {
+                origin = new Point(-1, -1);
             }
-            if (size == undefined) {
-                size = new Size(-1,-1);
+            if (size === undefined) {
+                size = new Size(-1, -1);
             }
             this.origin = origin;
             this.size = size;
         }
 
-        Rectangle.prototype.invert = function() {
+        Rectangle.prototype.invert = function () {
             return new Rectangle(
                 this.height,
                 this.width
-            );
-        }
+                );
+        };
 
-        Rectangle.prototype.lowerRight = function() {
+        Rectangle.prototype.lowerRight = function () {
             return new Point(
                 this.origin.x + this.size.width,
                 this.origin.y + this.size.height
-            )
-        }
+                );
+        };
 
-        Rectangle.prototype.insetRect = function(dx,dy) {
+        Rectangle.prototype.insetRect = function (dx, dy) {
             return new Rectangle(
                 new Point(this.origin.x + dx / 2, this.origin.y + dy / 2),
                 new Size(this.size.width - dx, this.size.height - dy)
-            );
-        }
+                );
+        };
 
         Rectangle.prototype.fromString = function (string) {
-            var results;
-            if (results = string.match(/{{(.+),\s*(.+)},\s*{(.+),\s*(.+)}}/)) {
+            var results = string.match(/{{(.+),\s*(.+)},\s*{(.+),\s*(.+)}}/);
+            if (results) {
                 return new Rectangle(
                     new Point(parseInt(results[1]), parseInt(results[2])),
                     new Size(parseInt(results[3]), parseInt(results[4])));
-            }
-            else {
+            } else {
                 return undefined;
             }
-        }
+        };
 
         Rectangle.prototype.intersects = function (r2) {
             if (
@@ -61,13 +57,12 @@ define(['kb_vis_point', 'kb_vis_size'],
                 && this.origin.y < r2.origin.y + r2.size.height
                 && this.origin.y + this.size.height > r2.origin.y
                 )
-                {
-                    return true;
-            }
-            else {
+            {
+                return true;
+            } else {
                 return false;
             }
-        }
+        };
 
         Rectangle.prototype.unionRect = function (r2, padding) {
 
@@ -85,7 +80,7 @@ define(['kb_vis_point', 'kb_vis_size'],
             union.size.width = union.origin.x + rightX;
             union.size.height = union.origin.Y + rightY;
 
-            if (padding != undefined) {
+            if (padding !== undefined) {
                 union.origin.x -= padding;
                 union.origin.y -= padding;
                 union.size.width += padding * 2;
@@ -94,22 +89,21 @@ define(['kb_vis_point', 'kb_vis_size'],
 
             return union;
 
-        }
+        };
 
-        Rectangle.prototype.isValidRect = function() {
+        Rectangle.prototype.isValidRect = function () {
             if (
-                   isNaN(this.origin.x)
+                isNaN(this.origin.x)
                 || isNaN(this.origin.y)
                 || isNaN(this.size.width)
-                || isNaN(this.size.height) ) {
-                    return false;
-            }
-            else {
+                || isNaN(this.size.height)) {
+                return false;
+            } else {
                 return true;
             }
-        }
+        };
 
-        Rectangle.prototype.intersectRect = function(r2) {
+        Rectangle.prototype.intersectRect = function (r2) {
 
             var intersect = new Rectangle();
 
@@ -135,37 +129,34 @@ define(['kb_vis_point', 'kb_vis_size'],
 
             return intersect;
 
-        }
+        };
 
         Rectangle.prototype.containsPoint = function (p) {
             var ux = this.origin.x + this.size.width;
             var uy = this.origin.y + this.size.height;
             if (p.x >= this.origin.x && p.x <= ux
                 && p.y >= this.origin.y && p.y <= uy) {
-                    return true;
-            }
-            else {
+                return true;
+            } else {
                 return false;
             }
-        }
+        };
 
         Rectangle.prototype.equals = function (r2) {
-            if (this == undefined || r2 == undefined) {
+            if (this === undefined || r2 === undefined) {
                 return false;
+            } else {
+                return this.origin.x === r2.origin.x
+                    && this.origin.y === r2.origin.y
+                    && this.size.width === r2.size.width
+                    && this.size.height === r2.size.height;
             }
-            else {
-                return this.origin.x == r2.origin.x
-                    && this.origin.y == r2.origin.y
-                    && this.size.width == r2.size.width
-                    && this.size.height == r2.size.height;
-            }
-        }
+        };
 
         Rectangle.prototype.asString = function () {
             return "{" + this.origin.asString() + ", " + this.size.asString() + "}";
-        }
+        };
 
         return Rectangle;
-
     }
 );

@@ -1,29 +1,25 @@
-/*global
- define
- */
-/*jslint
- browser: true,
- white: true
- */
-define(['kb_vis_rectangle', ],
+/*global define */
+/*jslint browser: true, white: true */
+define([
+    'kb_vis_rectangle'
+],
     function (Rectangle) {
-
         'use strict';
 
-        function Point(x,y) {
+        function Point(x, y) {
             this.x = x;
             this.y = y;
         }
 
         Point.prototype.asString = function () {
             return "{" + this.x + ", " + this.y + "}";
-        }
+        };
 
-        Point.prototype.offset = function(dx, dy) {
+        Point.prototype.offset = function (dx, dy) {
             return new Point(this.x + dx, this.y + dy);
-        }
+        };
 
-        Point.prototype.rectWithPoint = function(point) {
+        Point.prototype.rectWithPoint = function (point) {
 
             var ux = this.x < point.x
                 ? this.x
@@ -37,9 +33,9 @@ define(['kb_vis_rectangle', ],
 
             return new Rectangle(
                 new Point(ux, uy),
-                new Size (width, height)
-            );
-        }
+                new Size(width, height)
+                );
+        };
 
         return Point;
     }
