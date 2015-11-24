@@ -258,14 +258,12 @@ define([
                     var barScale = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([0,$bar.xScale().rangeBand()])
-                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05)
-                        ;
+                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05);
 
                     var barScale2 = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([85])
-                        .rangeBands([0, 85], 0.05)
-                        ;
+                        .rangeBands([0, 85], 0.05);
 
                     d3.select(this).selectAll('.bar')
                         .data(d.value)
@@ -320,13 +318,11 @@ define([
                 .enter()
                 .append('g')
                 .attr('class', 'barGroup')
-                .call(groupAction)
-                ;
+                .call(groupAction);
 
             chart
                 .data(this.dataset())
-                .call(groupAction)
-                ;
+                .call(groupAction);
 
             chart
                 .data(this.dataset())

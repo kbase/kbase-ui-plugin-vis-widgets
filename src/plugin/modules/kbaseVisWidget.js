@@ -6,7 +6,7 @@ define([
     'kb_vis_rectangle',
     'kb_vis_point',
     'kb_vis_size',
-    'kb_widgetBases_kbWidget'
+    'kb/widget/bases/widget'
 ],
     function ($, d3, Rectangle, Point, Size) {
         'use strict';
@@ -64,7 +64,7 @@ define([
                 legendSize: '7pt',
                 legendTextXOffset: 6,
                 legendTextYOffset: 3,
-                aspectRatio: 'default',
+                aspectRatio: 'default'
                 //autoLegend : true,
             },
             shouldScaleAxis: function (axis) {
@@ -186,7 +186,7 @@ define([
 
                 yScale.domain(domain);
 
-                if (this.options.useIDMapping && this.yIDMap() == undefined) {
+                if (this.options.useIDMapping && this.yIDMap() === undefined) {
                     this.yIDMap(this.createIDMapForDomain(domain));
                 }
 
@@ -238,13 +238,13 @@ define([
                 }, this);
 
                 if (this.options.width !== undefined && this.options.width.match(/px/)) {
-                    this.width(parseInt(this.options.width));
+                    this.width(parseInt(this.options.width, 10));
                 } else {
                     this.width(this.$elem.width());
                 }
 
                 if (this.options.height !== undefined && this.options.height.match(/px/)) {
-                    this.height(parseInt(this.options.height));
+                    this.height(parseInt(this.options.height, 10));
                 } else {
                     this.height(this.$elem.height());
                 }
@@ -273,7 +273,7 @@ define([
                     return;
                 }
 
-                if (field == undefined || field === 'chart') {
+                if (field === undefined || field === 'chart') {
                     this.renderChart();
                 }
 
@@ -289,7 +289,7 @@ define([
                     this.renderXLabel();
                 }
 
-                if (field === undefined || field == 'yLabel') {
+                if (field === undefined || field === 'yLabel') {
                     this.renderYLabel();
                 }
 
@@ -297,24 +297,21 @@ define([
                     this.renderULCorner();
                 }
 
-                if (field === undefined || field == 'legend') {
+                if (field === undefined || field === 'legend') {
                     this.renderLegend();
                 }
 
             },
             fitTextToWidth: function (text, width) {
-
                 var fakeText = this.D3svg()
                     .append('text')
                     .attr('opacity', 0)
                     .attr('font-size', this.options.legendSize)
-                    .text(text);
-
-                var box = fakeText[0][0].getBBox();
-
-                var truncatedText = text;
-                var truncated = false;
-                var originalWidth = box.width;
+                    .text(text),
+                    box = fakeText[0][0].getBBox(),
+                    truncatedText = text,
+                    truncated = false,
+                    originalWidth = box.width;
 
                 while (box.width + this.options.legendTextXOffset > width && truncatedText.length) {
                     truncatedText = truncatedText.substring(0, truncatedText.length - 1);
@@ -334,13 +331,10 @@ define([
 
             },
             renderLegend: function () {
-
                 if (this.legend() === undefined) {
                     return;
                 }
-
                 var $vis = this;
-
                 var shapeArea = {
                     circle: 81,
                     square: 81,
@@ -348,17 +342,12 @@ define([
                     'triangle-down': 49,
                     diamond: 36,
                     cross: 49
-                }
-
+                };
                 var legendRectSize = 8;
-
                 var legendRegionBounds = this[this.options.legendRegion + 'Bounds']();
-
                 var legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
-
                 var legendX = 0;
                 var legendY = 0;
-
                 var textXOffset = $vis.options.legendTextXOffset;
                 var textYOffset = $vis.options.legendTextYOffset;
 
@@ -367,16 +356,13 @@ define([
                 }
 
                 if (this.options.legendAlignment.match(/R/)) {
-
                     var actualWidth = 0;
                     this.legend().forEach(function (item, i) {
                         var trunc = $vis.fitTextToWidth(item.label, legendWidth);
                         actualWidth = Math.max(actualWidth, trunc.width);
                     });
 
-
                     legendX = legendRegionBounds.size.width - (actualWidth + textXOffset + 6);
-
                 }
 
                 var uniqueKey = function (d) {
@@ -401,7 +387,6 @@ define([
                     .enter()
                     .append('g')
                     .each(function (d, i) {
-
                         var g = d3.select(this);
 
                         g.attr('transform', function (b, j) {
@@ -414,8 +399,7 @@ define([
                         g.append('text')
                             .attr('class', 'legend-text')
                             .attr('opacity', 0);
-                    })
-                    ;
+                    });
 
                 var time = this.drawnLegend ? this.options.transitionTime : 0;
 
@@ -426,7 +410,7 @@ define([
 
                         g.transition().duration(time).attr('transform', function (b, j) {
                             return gTransform(b, j, i);
-                        })
+                        });
 
                         var truncationObj = $vis.fitTextToWidth(d.label, legendWidth);
 
@@ -456,7 +440,7 @@ define([
                         if (truncationObj.truncated) {
                             g.selectAll('text')
                                 .on('mouseover', function (d) {
-                                    $vis.showToolTip({label: truncationObj.text})
+                                    $vis.showToolTip({label: truncationObj.text});
                                 })
                                 .on('mouseout', function (d) {
                                     $vis.hideToolTip();
@@ -541,8 +525,7 @@ define([
             setDataset: function (newDataset) {
                 if (newDataset === undefined) {
                     newDataset = this.options.defaultDataset();
-                }
-                ;
+                };
 
                 this.setValueForKey('dataset', newDataset);
 
@@ -562,7 +545,6 @@ define([
                 this.render();
             },
             setDatasets: function (newDatasets) {
-
                 if (newDatasets === undefined) {
                     newDatasets = [];
                 }
@@ -578,7 +560,6 @@ define([
 
                 //the remaining children are datasets of this vis.
                 var initKids = function () {
-
                     $me.setDataset(myDataset);
 
                     for (var i = 0; i < newDatasets.length; i++) {
@@ -641,7 +622,7 @@ define([
             renderYLabel: function () {
                 var labelRegionBounds = this[this.options.yLabelRegion + 'Bounds']();
                 var yLabeldataset = [this.yLabel()];
-                var rotation = this.options.yLabelRegion == 'xPadding' ? -90 : 90;
+                var rotation = this.options.yLabelRegion === 'xPadding' ? -90 : 90;
                 var xOffset = this.options.yLabelOffset;
                 var yLabel = this.D3svg().select(this.region(this.options.yLabelRegion)).selectAll('.yLabel');
 
@@ -708,7 +689,7 @@ define([
                         .tickValues(ticks)
                         .tickSubdivide(0)
                         .tickFormat(function (d) {
-                            return $self.xTickLabel.call($self, d)
+                            return $self.xTickLabel.call($self, d);
                         });
                 }
 
@@ -722,7 +703,7 @@ define([
                     gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion))
                         .append('g')
                         .attr('class', 'xAxis axis')
-                        .attr('fill', this.options.xAxisColor)
+                        .attr('fill', this.options.xAxisColor);
                 }
                 console.log("GX AXIS ", gxAxis, gxAxis[0][0].parentNode);
 
@@ -834,7 +815,7 @@ define([
 
                     D3svg = d3.select($elem.get(0))
                         .append('svg')
-                        .attr('style', 'width : ' + this.options.width + '; height : ' + this.options.height)
+                        .attr('style', 'width : ' + this.options.width + '; height : ' + this.options.height);
                     //.attr('viewBox', '0 0 1600 1600')
                     //.attr('preserveAspectRatio', 'mMidYMid mMidYMid')
                     //.attr('width', 1600)
@@ -866,7 +847,7 @@ define([
                                 'display': 'none',
                                 'font-family': 'sans-serif',
                                 'font-size': '12px',
-                                'line-height': '20px',
+                                'line-height': '20px'
                             }
                         );
 
@@ -970,7 +951,7 @@ define([
 
                                 return 'translate(' + transform.translate.x + ',' + transform.translate.y + ')'
                                     + ' scale(' + transform.scale.width + ',' + transform.scale.height + ')';
-                            })
+                            });
                     }
                 );
 
@@ -1206,7 +1187,7 @@ define([
                         y1: chartBounds.size.height, //chartBounds.origin.y,
                         y2: 0,
                         width: 0,
-                        height: chartBounds.size.height,
+                        height: chartBounds.size.height
                     },
                     grad
                     );
@@ -1276,13 +1257,13 @@ define([
                         if (i === grad.colors.length - 1) {
                             num = 1;
                         } else if (i > 0) {
-                            num = i / (grad.colors.length - 1)
+                            num = i / (grad.colors.length - 1);
                         }
 
                         return (Math.round(10000 * num) / 100) + '%';
                     })
                     .attr('stop-color', function (d) {
-                        return d
+                        return d;
                     });
 
 
@@ -1294,7 +1275,7 @@ define([
                 if (xCoord === undefined) {
                     xCoord = function () {
                         return 0;
-                    }
+                    };
                 };
 
                 text.each(function () {
@@ -1355,6 +1336,6 @@ define([
                 return this.options.useUniqueID
                     ? uniqueFunc
                     : undefined;
-            },
+            }
         });
     });

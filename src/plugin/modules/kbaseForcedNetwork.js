@@ -2,9 +2,9 @@
 /*jslint white: true, browser: true */
 define([
     'jquery',
-    'kb_widget_search_controls',
     'd3',
     'kb_vis_RGBColor',
+    'kb/widget/legacy/searchControls',
     'kb_vis_visWidget',
     'kb_vis_rectangle',
     'kb_vis_point',

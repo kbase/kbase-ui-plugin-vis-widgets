@@ -244,7 +244,6 @@ define([
                     }
                 );
 
-
                 var funkyTown = function () {
                     this
                         .attr('fill-opacity', .67)
@@ -274,8 +273,7 @@ define([
                                     var chord = d3.svg.chord().radius(innerRadius)(interpolate(t));
                                     return chord;
                                 };
-                            })
-                            ;
+                            });
                     }
 
                     return this;

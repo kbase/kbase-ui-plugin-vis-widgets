@@ -2,7 +2,7 @@
 /*jslint white: true, browser: true*/
 define([
     'jquery',
-    'kb_vis_linechart',
+    'kb_vis_linechart'
 ], function ($) {
     'use strict';
 

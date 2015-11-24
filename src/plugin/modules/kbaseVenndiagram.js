@@ -295,7 +295,7 @@ define([
                     value: dataset.c1c2c3.value,
                     radius: 0,
                     fontSize: this.options.intersectFontSize
-                },
+                }
             ];
 
             var transitionTime = this.initialized

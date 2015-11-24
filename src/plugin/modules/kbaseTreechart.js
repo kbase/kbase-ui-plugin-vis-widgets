@@ -379,7 +379,7 @@ define([
                 .attr("r", 1e-6)
                 .attr('style', 'cursor : pointer;')
                 .attr('stroke', function (d) {
-                    return d.stroke || $tree.options.circleStroke
+                    return d.stroke || $tree.options.circleStroke;
                 })
                 .style("fill", function (d) {
                     return d._children ? $tree.options.openCircleFill : $tree.options.closedCircleFill;
