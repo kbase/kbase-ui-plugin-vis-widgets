@@ -6,7 +6,7 @@ define([
     'kb_vis_rectangle',
     'kb_vis_point',
     'kb_vis_size',
-    'kb/widget/bases/widget'
+    'kb/widget/legacy/widget'
 ],
     function ($, d3, Rectangle, Point, Size) {
         'use strict';
