@@ -105,13 +105,10 @@ define([
                 return this.dataset();
             },
             setInput: function (newInput) {
-
                 if ($.isPlainObject(newInput) && newInput.dataset !== undefined) {
                     return this.setValuesForKeys(newInput);
-                } else {
-                    return this.setDataset(newInput);
-                }
-
+                } 
+                return this.setDataset(newInput);
             },
             setXLabel: function (newXLabel) {
                 this.setValueForKey('xLabel', newXLabel);
@@ -227,7 +224,8 @@ define([
                 }
 
                 this.ticker = function () {
-                    return ++this.options.ticker;
+                    this.options.ticker += 1;
+                    return this.options.ticker;
                 };
 
                 this.uniqueID = $.proxy(function (d) {
@@ -268,7 +266,6 @@ define([
 
             },
             render: function (field) {
-
                 if (!this._init) {
                     return;
                 }
@@ -300,7 +297,6 @@ define([
                 if (field === undefined || field === 'legend') {
                     this.renderLegend();
                 }
-
             },
             fitTextToWidth: function (text, width) {
                 var fakeText = this.D3svg()
@@ -328,28 +324,27 @@ define([
                     truncatedText: text === truncatedText ? text : truncatedText + '...',
                     width: originalWidth
                 };
-
             },
             renderLegend: function () {
                 if (this.legend() === undefined) {
                     return;
                 }
-                var $vis = this;
-                var shapeArea = {
+                var $vis = this,
+                    shapeArea = {
                     circle: 81,
                     square: 81,
                     'triangle-up': 49,
                     'triangle-down': 49,
                     diamond: 36,
                     cross: 49
-                };
-                var legendRectSize = 8;
-                var legendRegionBounds = this[this.options.legendRegion + 'Bounds']();
-                var legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
-                var legendX = 0;
-                var legendY = 0;
-                var textXOffset = $vis.options.legendTextXOffset;
-                var textYOffset = $vis.options.legendTextYOffset;
+                },
+                    legendRectSize = 8,
+                    legendRegionBounds = this[this.options.legendRegion + 'Bounds'](),
+                    legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width),
+                    legendX = 0,
+                    legendY = 0,
+                    textXOffset = $vis.options.legendTextXOffset,
+                    textYOffset = $vis.options.legendTextYOffset;
 
                 if (this.options.legendAlignment.match(/B/)) {
                     legendY = legendRegionBounds.size.height - $vis.options.legendLineHeight * this.legend().length;
@@ -357,7 +352,7 @@ define([
 
                 if (this.options.legendAlignment.match(/R/)) {
                     var actualWidth = 0;
-                    this.legend().forEach(function (item, i) {
+                    this.legend().forEach(function (item) {
                         var trunc = $vis.fitTextToWidth(item.label, legendWidth);
                         actualWidth = Math.max(actualWidth, trunc.width);
                     });
@@ -416,13 +411,13 @@ define([
 
                         g.selectAll('path')
                             .transition().duration(time)
-                            .attr('d', function (b) {
+                            .attr('d', function () {
                                 return d3.svg.symbol().type(d.shape || 'square').size(shapeArea[d.shape] || 81)();
                             })
-                            .style('fill', function (b, j) {
+                            .style('fill', function () {
                                 return d.color;
                             })
-                            .style('stroke', function (b, j) {
+                            .style('stroke', function () {
                                 return d.color;
                             })
                             .attr('opacity', 1);
@@ -439,10 +434,10 @@ define([
 
                         if (truncationObj.truncated) {
                             g.selectAll('text')
-                                .on('mouseover', function (d) {
+                                .on('mouseover', function () {
                                     $vis.showToolTip({label: truncationObj.text});
                                 })
-                                .on('mouseout', function (d) {
+                                .on('mouseout', function () {
                                     $vis.hideToolTip();
                                 });
                         }
@@ -450,7 +445,7 @@ define([
 
                 legend
                     .exit()
-                    .each(function (d, i) {
+                    .each(function () {
                         var g = d3.select(this);
 
                         g.selectAll('path')
@@ -470,15 +465,12 @@ define([
 
             },
             renderULCorner: function () {
-
-                var ulBounds = this.ULBounds();
-
-                var imgSize = new Size(
+                var ulBounds = this.ULBounds(),
+                    imgSize = new Size(
                     ulBounds.size.width,
                     ulBounds.size.height
-                    );
-
-                var inset = 5;
+                    ),
+                    inset = 5;
 
                 imgSize.width -= inset;
                 imgSize.height -= inset;
@@ -525,7 +517,7 @@ define([
             setDataset: function (newDataset) {
                 if (newDataset === undefined) {
                     newDataset = this.options.defaultDataset();
-                };
+                }
 
                 this.setValueForKey('dataset', newDataset);
 
@@ -534,7 +526,7 @@ define([
                 }
 
                 if (this.shouldScaleAxis('y')) {
-                    console.log("SHOULD SCALE Y, so sets it", this.defaultYDomain());
+                    console.warn("SHOULD SCALE Y, so sets it", this.defaultYDomain());
                     this.setYScaleDomain(this.defaultYDomain());
                 }
 
@@ -584,9 +576,7 @@ define([
 
                     $me.render();
                 };
-
                 this.callAfterInit(initKids);
-
             },
             reenter: function (idx, dataset, $parent) {},
             childOptions: function (idx, dataset) {
@@ -699,7 +689,7 @@ define([
 
                 var gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion)).select('.xAxis');
 
-                if (gxAxis[0][0] === undefined) {
+                if (gxAxis.empty()) {
                     gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion))
                         .append('g')
                         .attr('class', 'xAxis axis')
