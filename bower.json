@@ -1,0 +1,17 @@
+{
+  "name": "kbase-ui-plugin-vis-widgets",
+  "version": "0.1.0",
+  "main": [
+      
+  ],
+  "ignore": [
+    "/tests",
+    "Gruntfile.js",
+    "package.json",
+    ".gitignore"
+  ],  
+  "dependencies": {
+  },
+  "devDependencies": {},
+  "license": "SEE LICENSE IN LICENSE.md"
+}
