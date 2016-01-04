@@ -1,17 +1,26 @@
 {
   "name": "kbase-ui-plugin-vis-widgets",
-  "version": "0.1.0",
-  "main": [
-      
+  "description": "Visualization widgets - charts, plots",
+  "keywords": [
+      "kbase", "widget"
   ],
+  "author": [
+      "kbase"
+  ],
+  "moduleType": "kbase-ui-plugin",
+  "main": "src/plugin/config.yml",
   "ignore": [
-    "/tests",
-    "Gruntfile.js",
-    "package.json",
     ".gitignore"
   ],  
   "dependencies": {
+      "jquery": "^2.1.0",
+      "d3": "^3.5.0",
+      "kbase-ui-widget": "^0.1.0"
   },
   "devDependencies": {},
+  "repository": {
+      "type": "git",
+      "url": "git://github.com/kbase/kbase-ui-plugin-vis-widgets"
+  },
   "license": "SEE LICENSE IN LICENSE.md"
 }

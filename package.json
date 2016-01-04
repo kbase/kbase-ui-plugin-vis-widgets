@@ -1,8 +1,0 @@
-{
-    "name": "kbase-ui-plugin-vis-widgets",
-    "version": "0.1.0",
-    "keywords": ["kbase", "plugin"],
-    "author": "KBase",
-    "contributors": [],
-    "dependencies": {}
-}
