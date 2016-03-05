@@ -3,7 +3,7 @@
 define([
     'jquery',
     'd3',
-    'kb_vis_barchart'
+    'kb/widget/legacy/authenticatedWidget'
 ], function ($, d3) {
     'use strict';
 
