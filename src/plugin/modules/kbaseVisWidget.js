@@ -64,7 +64,7 @@ define([
                 legendSize: '7pt',
                 legendTextXOffset: 6,
                 legendTextYOffset: 3,
-                aspectRatio: 'default',
+                aspectRatio: 'default'
                 //autoLegend : true,
             },
             shouldScaleAxis: function shouldScaleAxis(axis) {
@@ -228,9 +228,8 @@ define([
                 }
 
                 this.ticker = function () {
-                    this.options.ticker += 1;
-                    return this.options.ticker;
-                }
+                    return ++this.options.ticker;
+                };
 
                 this.uniqueID = $.proxy(function (d) {
                     if (d.id === undefined) {
@@ -332,7 +331,7 @@ define([
                     text: text,
                     truncatedText: text === truncatedText ? text : truncatedText + '...',
                     width: originalWidth
-                }
+                };
 
             },
             legendOver: function legendOver() {},
@@ -409,8 +408,8 @@ define([
                         var g = d3.select(this);
 
                         g.attr('transform', function (b, j) {
-                            return gTransform(b, j, i)
-                        })
+                            return gTransform(b, j, i);
+                        });
 
                         g
                             .append('path')
@@ -420,7 +419,8 @@ define([
                             .attr('class', 'legend-text')
                             .attr('opacity', 0)
                             ;
-                    });
+                    })
+                    ;
 
                 var time = this.drawnLegend ? this.options.transitionTime : 0;
 
@@ -446,7 +446,9 @@ define([
                             .style('stroke', function (b, j) {
                                 return d.color;
                             })
-                            .attr('opacity', 1);
+                            .attr('opacity', 1)
+
+                            ;
 
                         g.selectAll('text')
                             .transition().duration(time)
@@ -457,12 +459,13 @@ define([
                             .text(function () {
                                 return truncationObj.truncatedText;
                             })
-                            .attr('opacity', 1);
+                            .attr('opacity', 1)
+                            ;
 
                         g.selectAll('text')
                             .on('mouseover', function (d) {
                                 if (truncationObj.truncated) {
-                                    $vis.showToolTip({label: truncationObj.text})
+                                    $vis.showToolTip({label: truncationObj.text});
                                 }
 
                                 if (d.represents) {
@@ -477,7 +480,8 @@ define([
                                     $vis.legendOut(d.represents);
                                 }
                             });
-                    });
+                    })
+                    ;
 
                 legend
                     .exit()
@@ -496,11 +500,13 @@ define([
                             .remove();
 
                         g.remove();
-                    });
+                    })
+                    ;
 
                 this.drawnLegend = true;
 
                 return;
+
             },
             renderULCorner: function renderULCorner() {
 
@@ -764,7 +770,8 @@ define([
                         .tickSubdivide(0)
                         .tickFormat(function (d) {
                             return $self.xTickLabel.call($self, d);
-                        });
+                        })
+                        ;
                 }
 
                 if (!this.options.xLabels) {
@@ -799,7 +806,8 @@ define([
                                 //firefox is stupid! the first call to getBBox fails because it's not attached yet. Tosses an exception.
                                 return undefined;
                             }
-                        });
+                        })
+                        ;
                 }
 
                 var transitionTime = this.renderedXAxis
@@ -960,7 +968,8 @@ define([
                                 'font-size': '12px',
                                 'line-height': '20px'
                             }
-                        );
+                        )
+                        ;
 
                     this.data('D3svg', D3svg);
                 }
@@ -1200,6 +1209,7 @@ define([
                 d3.selectAll('.visToolTip').style('display', 'none');
             },
             radialGradient: function radialGradient(grad) {
+
                 grad = $.extend(
                     true,
                     {
@@ -1263,7 +1273,8 @@ define([
                     .attr('r', function (d) {
                         return 2.5 * d.r;
                     })
-                    .attr('spreadMethod', 'pad');
+                    .attr('spreadMethod', 'pad')
+                    ;
 
                 var transitionTime = newGrad
                     ? 0
@@ -1295,7 +1306,7 @@ define([
                     .attr('offset', '70%');
                 stop70.transition().duration(transitionTime)
                     .attr('stop-color', function (d) {
-                        return d.stopColor;
+                        return d.stopColor
                     });
 
                 return this.radialGradients()[gradKey] = grad.id;
@@ -1410,7 +1421,6 @@ define([
                         return 0;
                     };
                 }
-                ;
 
                 text.each(function () {
                     var text = d3.select(this),
@@ -1474,4 +1484,5 @@ define([
                     : undefined;
             }
         });
+
     });
