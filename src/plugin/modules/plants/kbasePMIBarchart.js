@@ -49,22 +49,22 @@ define([
     'bluebird',
     'kb/service/client/workspace',
     'kb_vis_barChart',
-    'kb_vis_visWidget',
+    'kb/widget/legacy/authenticatedWidget',
     'bootstrap'
 ], function ($, d3, Promise, Workspace) {
     'use strict';
 
     $.KBWidget({
         name: "kbasePMIBarchart",
-        parent: "kbaseVisWidget",
+        parent: "kbaseAuthenticatedWidget",
         version: "1.0.0",
         options: {
             subsystem_annotation_object: 'PlantSEED_Subsystems',
             subsystem_annotation_workspace: 'PlantSEED',
-            selected_subsystems: ["Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants"],
+            selected_subsystems: ["Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants"]
         },
         _accessors: [
-            {name: 'dataset', setter: 'setDataset'},
+            {name: 'dataset', setter: 'setDataset'}
         ],
         setDataset: function setDataset(newDataset) {
 
@@ -439,17 +439,16 @@ define([
                 workspaceClient.get_objects([subanno_params]),
                 workspaceClient.get_objects([fbaobj_params])
             ])
-                .then(function (d1, d2) {
+                .spread(function (d1, d2) {
                     var interval = setInterval(function () {
                         if ($pmi.data('loader').is(':visible')) {
                             clearInterval(interval);
                             $pmi.parseWorkspaceData(d1, d2);
                         }
                     }, 2000);
-
+                    return null;
                 })
                 .catch(function (d) {
-
                     $pmi.$elem.empty();
                     $pmi.$elem
                         .addClass('alert alert-danger')
@@ -611,7 +610,7 @@ define([
                 .append(
                     $.jqElem('div')
                     .attr('id', 'loader')
-                    .append('<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this narrative may be unresponsive.')
+                    .append('<br>&nbsp;Loading data...<br>&nbsp;please wait...<br>&nbsp;Data parsing may take upwards of 30 seconds, during which time this window may be unresponsive.')
                     .append($.jqElem('br'))
                     .append(
                         $.jqElem('div')
