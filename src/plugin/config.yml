@@ -64,3 +64,6 @@ source:
         -
             module: kb_vis_visWidget
             file: kbaseVisWidget
+        -
+            module: kb_vis_pmiBarchart
+            file: plants/kbasePMIBarchart

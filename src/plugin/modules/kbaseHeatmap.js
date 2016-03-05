@@ -21,22 +21,20 @@ define([
                 xGutter: 110,
                 overColor: '#999900',
                 hmBGColor: 'lightgray',
-                colors: ["#ffff00", '#000000', "#0000ff"],
+                colors: ['#0000FF', '#FFFFFF', '#FF0000'],
                 //clickCallback : function(d, $hm) {
                 //    $hm.debug(d);
                 //},
 
                 rx: 2,
                 ry: 2,
-                cellPadding: 1
+                cellPadding: 1,
             },
             _accessors: [
-                'spectrum'
+                'spectrum',
             ],
             init: function (options) {
                 this._super(options);
-
-                this.options.gradientID = this.linearGradient({colors: this.options.colors});
 
                 return this;
             },
@@ -46,6 +44,17 @@ define([
                 }
 
                 this._super(newDataset);
+
+                var colorScaleDomain = this.colorScale().nice().domain();
+
+                var zeroPercent = 100 * Math.abs(colorScaleDomain[0]) / (Math.abs(colorScaleDomain[0]) + Math.abs(colorScaleDomain[2]));
+
+                this.options.gradientID = this.linearGradient(
+                    {
+                        colors: this.options.colors,
+                        gradStops: ['0%', zeroPercent + '%', '100%']
+                    }
+                );
             },
             setSpectrum: function (newSpectrum) {
                 this.spectrum(
@@ -126,19 +135,7 @@ define([
                 gxAxis
                     .transition()
                     .duration(0)
-                    .call(xAxis)
-                    .selectAll("text")
-                    .attr("transform", function (d, i) {
-                        var bounds = $hm.yGutterBounds();
-                        //bullshit hardwired magic numbers. The xAxis is "known"(?) to position @ (0,-9)
-                        //arbitrarily rotate around -12 because it looks right. I got nothin'.
-                        //then we move it 5 pixels to the right, which in our rotate coordinate system is
-                        //5 pixels up. Whee!
-                        var width = d3.select(this).node().getComputedTextLength();
-
-                        return "rotate(-45,0,0) translate(" + (width / 2 + 5) + ",5)";// translate(2,3)";
-                    })
-                    ;
+                    .call(xAxis);
 
                 /*
                  As is typical, my life is pain. Here's the deal -
@@ -180,6 +177,16 @@ define([
 
                     d3.select(this).attr('data-id', $hm.dataset().column_ids[label_idx]);
                     d3.select(this)
+                        .attr("transform", function (d, i) {
+                            var bounds = $hm.yGutterBounds();
+                            //bullshit hardwired magic numbers. The xAxis is "known"(?) to position @ (0,-9)
+                            //arbitrarily rotate around -12 because it looks right. I got nothin'.
+                            //then we move it 5 pixels to the right, which in our rotate coordinate system is
+                            //5 pixels up. Whee!
+
+                            var width = d3.select(this).node().getComputedTextLength();
+                            return "rotate(-45,0,0) translate(" + (width / 2 + 5) + ",5)";// translate(2,3)";
+                        })
                         .on('mouseover', function (d) {
                             d3.select(this).attr('fill', $hm.options.overColor);
                             var d3this = d3.select(this);
@@ -225,8 +232,6 @@ define([
                     .attr('font-family', 'sans-serif')
                     .attr('fill', 'black')
                     .text(this.xLabel());
-                ;
-
             },
             renderYLabel: function () {
                 var xGutterBounds = this.xGutterBounds();
@@ -239,8 +244,10 @@ define([
                     .attr('y', 0)
                     .attr('width', xGutterBounds.size.width / 3)
                     .attr('height', xGutterBounds.size.height)
-                    .attr('fill', 'url(#' + this.options.gradientID + ')')
-                    ;
+                    .attr('font-size', '11px')
+                    .attr('font-family', 'sans-serif')
+                    .attr('fill', 'black')
+                    .attr('fill', 'url(#' + this.options.gradientID + ')');
 
                 var colorScale = this.colorScale();
 
@@ -255,8 +262,7 @@ define([
                 var tempAxis =
                     d3.svg.axis()
                     .scale(tempScale)
-                    .orient('right')
-                    ;
+                    .orient('right');
 
 
                 var gtempAxis = this.D3svg().select(this.region('xGutter')).select('.tempAxis');
@@ -281,8 +287,6 @@ define([
                     );
 
                 gtempAxis.transition().call(tempAxis);
-
-
             },
             renderYAxis: function () {
 
@@ -350,7 +354,7 @@ define([
                             } else {
                                 $hm.hideToolTip();
                             }
-                        })
+                        });
                 });
 
             },
@@ -362,23 +366,26 @@ define([
 
                     var max = this.options.maxValue;
                     var min = this.options.minValue;
-                    if (max === undefined || min === undefined) {
-                        max = 0;
-                        min = 0;
-                        for (var i = 0; i < this.dataset().data.length; i++) {
-                            var row = this.dataset().data[i];
-                            for (var j = 0; j < row.length; j++) {
-                                if (row[j] > max) {
-                                    max = row[j];
-                                }
-                                if (row[j] < min) {
-                                    min = row[j];
+                    if (this.dataset() !== undefined) {
+                        if (max === undefined || min === undefined) {
+                            max = 0;
+                            min = 0;
+                            for (var i = 0; i < this.dataset().data.length; i++) {
+                                var row = this.dataset().data[i];
+                                for (var j = 0; j < row.length; j++) {
+                                    if (row[j] > max) {
+                                        max = row[j];
+                                    }
+                                    if (row[j] < min) {
+                                        min = row[j];
+                                    }
                                 }
                             }
                         }
                     }
 
-                    var domain = d3.range(min, max, (max - min) / this.options.colors.length);
+                    //var domain = d3.range(min, max, (max - min) / this.options.colors.length);
+                    var domain = [min, 0, max];
                     domain[0] = min;
                     domain[domain.length - 1] = max;
 
@@ -389,15 +396,16 @@ define([
 
                 return colorScale;
             },
+            cellHeight: function cellHeight() {
+                return this.yScale().rangeBand() - this.options.cellPadding * 2
+            },
             renderChart: function () {
-
                 var $hm = this;
                 var bounds = this.chartBounds();
 
                 if (this.dataset() === undefined) {
                     return;
                 }
-
 
                 var yIdScale = this.yScale().copy();
                 yIdScale.domain(this.dataset().row_ids);
@@ -433,7 +441,7 @@ define([
                         //.attr('y', function (d) { return $hm.yScale()(d.y) })
                         //.attr('opacity', function (d) { return d.value })
                         .attr('width', $hm.xScale().rangeBand() - $hm.options.cellPadding * 2)
-                        .attr('height', $hm.yScale().rangeBand() - $hm.options.cellPadding * 2)
+                        .attr('height', $hm.cellHeight())
                         .attr('rx', $hm.options.rx)
                         .attr('ry', $hm.options.ry)
                         .attr('fill',
@@ -499,7 +507,7 @@ define([
 
                             $hm.showToolTip(
                                 {
-                                    label: d.label || 'Value for: ' + d.row + ' - ' + d.column + '<br>is ' + d.value
+                                    label: d.label || 'Value for: ' + d.row + ' - ' + d.column + '<br>is ' + d.value,
                                 }
                             );
 
@@ -535,7 +543,7 @@ define([
                             if ($hm.options.clickCallback) {
                                 $hm.options.clickCallback(d, $hm);
                             }
-                        });
+                        })
                     return this;
                 };
 
@@ -575,7 +583,6 @@ define([
                     }
                 }
 
-
                 var chart = this.D3svg().select(this.region('chart')).selectAll('.davis-cell').data(oldStyleDataset);
                 chart
                     .enter()
@@ -591,7 +598,6 @@ define([
                     .call($hm.endall, function () {
                         $hm.initialized = true;
                     });
-                ;
 
                 chart
                     .data(oldStyleDataset)

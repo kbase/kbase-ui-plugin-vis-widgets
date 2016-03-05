@@ -22,7 +22,7 @@ define([
             yOffset: 0,
             innerRadius: -25,
             outerRadius: -25,
-            strokeWidth: .5,
+            strokeWidth: 0.5,
             strokeColor: 'black',
             choppedGroups: false,
             sortGroups: undefined,
@@ -80,8 +80,12 @@ define([
 
         },
         sliceAction: function ($chord) {
+
             var superMethod = $.KBWidget.registry()[$chord.parent].prototype['sliceAction'];
+
             superMethod = superMethod.call(this, $chord);
+
+            ;
 
             return function () {
                 this.call(superMethod);
@@ -89,6 +93,7 @@ define([
             };
         },
         renderChart: function () {
+
             var bounds = this.chartBounds();
             var $chord = this;
 
@@ -163,7 +168,6 @@ define([
                                         data: newData
                                     }
                                 );
-
                                 startAngle = endAngle;
                             }
                         );
@@ -223,7 +227,7 @@ define([
                     function (val, idx) {
                         //function (idx, val) {
 
-                        var newVal = $.extend(true, {}, val);
+                        newVal = $.extend(true, {}, val);
                         newVal.data = {};
 
                         newVal.source.startAngle += $chord.options.startAngle;
@@ -240,7 +244,6 @@ define([
                             colorIdx = newVal.target.index;
                         }
                         newVal.data.colorIdx = colorIdx;
-
                     }
                 );
 
@@ -338,8 +341,7 @@ define([
             tickArcs.exit().transition().duration(transitionTime).attr('opacity', 0)
                 .each('end', function (d) {
                     d3.select(this).remove();
-                })
-                ;
+                });
             //.remove();
 
             var tickGs = tickArcs.selectAll('g').data(groupTicks);
@@ -351,8 +353,7 @@ define([
                 .transition().duration(transitionTime).attr('opacity', 0)
                 .each('end', function (d) {
                     d3.select(this).remove();
-                })
-                ;
+                });
             //.remove();
             //.transition().duration(transitionTime)
             //.each('end', function(d) { d3.select(this).remove() });
@@ -431,7 +432,8 @@ define([
 
         },
         renderXAxis: function () {},
-        renderYAxis: function () {}
+        renderYAxis: function () {},
     });
+
 
 });

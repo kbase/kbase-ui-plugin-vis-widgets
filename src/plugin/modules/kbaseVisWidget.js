@@ -64,10 +64,10 @@ define([
                 legendSize: '7pt',
                 legendTextXOffset: 6,
                 legendTextYOffset: 3,
-                aspectRatio: 'default'
+                aspectRatio: 'default',
                 //autoLegend : true,
             },
-            shouldScaleAxis: function (axis) {
+            shouldScaleAxis: function shouldScaleAxis(axis) {
                 if (this.options.scaleAxes) {
                     return true;
                 } else if (axis === 'x' && this.options.scaleXAxis) {
@@ -85,6 +85,7 @@ define([
                 'yPadding',
                 'width',
                 'height',
+                {name: 'json_dataset', setter: 'setJSONDataset'},
                 {name: 'dataset', setter: 'setDataset'},
                 {name: 'legend', setter: 'setLegend'},
                 {name: 'input', setter: 'setInput'},
@@ -101,32 +102,35 @@ define([
                 'linearGradients',
                 'children'
             ],
-            input: function () {
+            input: function input() {
                 return this.dataset();
             },
-            setInput: function (newInput) {
+            setInput: function setInput(newInput) {
+
                 if ($.isPlainObject(newInput) && newInput.dataset !== undefined) {
                     return this.setValuesForKeys(newInput);
-                } 
-                return this.setDataset(newInput);
+                } else {
+                    return this.setDataset(newInput);
+                }
+
             },
-            setXLabel: function (newXLabel) {
+            setXLabel: function setXLabel(newXLabel) {
                 this.setValueForKey('xLabel', newXLabel);
                 this.render('xLabel');
             },
-            setYLabel: function (newYLabel) {
+            setYLabel: function setYLabel(newYLabel) {
                 this.setValueForKey('yLabel', newYLabel);
                 this.render('yLabel');
             },
-            setXScale: function (newXScale) {
+            setXScale: function setXScale(newXScale) {
                 this.setValueForKey('xScale', newXScale);
                 this.render('xAxis');
             },
-            setYScale: function (newYScale) {
+            setYScale: function setYScale(newYScale) {
                 this.setValueForKey('yScale', newYScale);
                 this.render('yAxis');
             },
-            createIDMapForDomain: function (domain) {
+            createIDMapForDomain: function createIDMapForDomain(domain) {
                 var map = {};
                 $.each(
                     domain,
@@ -136,7 +140,7 @@ define([
                 );
                 return map;
             },
-            setXScaleDomain: function (domain, scaleType) {
+            setXScaleDomain: function setXScaleDomain(domain, scaleType) {
                 var xScale = this.xScale();
 
                 if (xScale === undefined) {
@@ -160,7 +164,7 @@ define([
 
                 return xScale;
             },
-            setXScaleRange: function (range, xScale) {
+            setXScaleRange: function setXScaleRange(range, xScale) {
                 if (xScale === undefined) {
                     xScale = this.xScale();
                 }
@@ -168,7 +172,7 @@ define([
 
                 return xScale;
             },
-            setYScaleDomain: function (domain, scaleType) {
+            setYScaleDomain: function setYScaleDomain(domain, scaleType) {
                 var yScale = this.yScale();
 
                 if (yScale === undefined) {
@@ -191,7 +195,7 @@ define([
 
                 return yScale;
             },
-            setYScaleRange: function (range, yScale) {
+            setYScaleRange: function setYScaleRange(range, yScale) {
                 if (yScale === undefined) {
                     yScale = this.yScale();
                 }
@@ -199,7 +203,7 @@ define([
 
                 return yScale;
             },
-            init: function (options) {
+            init: function init(options) {
 
                 this._super(options);
 
@@ -226,7 +230,7 @@ define([
                 this.ticker = function () {
                     this.options.ticker += 1;
                     return this.options.ticker;
-                };
+                }
 
                 this.uniqueID = $.proxy(function (d) {
                     if (d.id === undefined) {
@@ -236,13 +240,13 @@ define([
                 }, this);
 
                 if (this.options.width !== undefined && this.options.width.match(/px/)) {
-                    this.width(parseInt(this.options.width, 10));
+                    this.width(parseInt(this.options.width));
                 } else {
                     this.width(this.$elem.width());
                 }
 
                 if (this.options.height !== undefined && this.options.height.match(/px/)) {
-                    this.height(parseInt(this.options.height, 10));
+                    this.height(parseInt(this.options.height));
                 } else {
                     this.height(this.$elem.height());
                 }
@@ -265,7 +269,8 @@ define([
                 return this;
 
             },
-            render: function (field) {
+            render: function render(field) {
+
                 if (!this._init) {
                     return;
                 }
@@ -297,17 +302,21 @@ define([
                 if (field === undefined || field === 'legend') {
                     this.renderLegend();
                 }
+
             },
-            fitTextToWidth: function (text, width) {
+            fitTextToWidth: function fitTextToWidth(text, width) {
+
                 var fakeText = this.D3svg()
                     .append('text')
                     .attr('opacity', 0)
                     .attr('font-size', this.options.legendSize)
-                    .text(text),
-                    box = fakeText[0][0].getBBox(),
-                    truncatedText = text,
-                    truncated = false,
-                    originalWidth = box.width;
+                    .text(text);
+
+                var box = fakeText[0][0].getBBox();
+
+                var truncatedText = text;
+                var truncated = false;
+                var originalWidth = box.width;
 
                 while (box.width + this.options.legendTextXOffset > width && truncatedText.length) {
                     truncatedText = truncatedText.substring(0, truncatedText.length - 1);
@@ -323,41 +332,55 @@ define([
                     text: text,
                     truncatedText: text === truncatedText ? text : truncatedText + '...',
                     width: originalWidth
-                };
+                }
+
             },
-            renderLegend: function () {
+            legendOver: function legendOver() {},
+            legendOut: function legendOut() {},
+            renderLegend: function renderLegend() {
+
                 if (this.legend() === undefined) {
                     return;
                 }
-                var $vis = this,
-                    shapeArea = {
+
+                var $vis = this;
+
+                var shapeArea = {
                     circle: 81,
                     square: 81,
                     'triangle-up': 49,
                     'triangle-down': 49,
                     diamond: 36,
                     cross: 49
-                },
-                    legendRectSize = 8,
-                    legendRegionBounds = this[this.options.legendRegion + 'Bounds'](),
-                    legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width),
-                    legendX = 0,
-                    legendY = 0,
-                    textXOffset = $vis.options.legendTextXOffset,
-                    textYOffset = $vis.options.legendTextYOffset;
+                };
+
+                var legendRectSize = 8;
+
+                var legendRegionBounds = this[this.options.legendRegion + 'Bounds']();
+
+                var legendWidth = Math.min(this.options.legendWidth || 1000000000, legendRegionBounds.size.width);
+
+                var legendX = 0;
+                var legendY = 0;
+
+                var textXOffset = $vis.options.legendTextXOffset;
+                var textYOffset = $vis.options.legendTextYOffset;
 
                 if (this.options.legendAlignment.match(/B/)) {
                     legendY = legendRegionBounds.size.height - $vis.options.legendLineHeight * this.legend().length;
                 }
 
                 if (this.options.legendAlignment.match(/R/)) {
+
                     var actualWidth = 0;
-                    this.legend().forEach(function (item) {
+                    this.legend().forEach(function (item, i) {
                         var trunc = $vis.fitTextToWidth(item.label, legendWidth);
                         actualWidth = Math.max(actualWidth, trunc.width);
                     });
 
+
                     legendX = legendRegionBounds.size.width - (actualWidth + textXOffset + 6);
+
                 }
 
                 var uniqueKey = function (d) {
@@ -382,18 +405,21 @@ define([
                     .enter()
                     .append('g')
                     .each(function (d, i) {
+
                         var g = d3.select(this);
 
                         g.attr('transform', function (b, j) {
-                            return gTransform(b, j, i);
-                        });
+                            return gTransform(b, j, i)
+                        })
 
-                        g.append('path')
-                            .attr('opacity', 0);
-
+                        g
+                            .append('path')
+                            .attr('opacity', 0)
+                            ;
                         g.append('text')
                             .attr('class', 'legend-text')
-                            .attr('opacity', 0);
+                            .attr('opacity', 0)
+                            ;
                     });
 
                 var time = this.drawnLegend ? this.options.transitionTime : 0;
@@ -411,13 +437,13 @@ define([
 
                         g.selectAll('path')
                             .transition().duration(time)
-                            .attr('d', function () {
+                            .attr('d', function (b) {
                                 return d3.svg.symbol().type(d.shape || 'square').size(shapeArea[d.shape] || 81)();
                             })
-                            .style('fill', function () {
+                            .style('fill', function (b, j) {
                                 return d.color;
                             })
-                            .style('stroke', function () {
+                            .style('stroke', function (b, j) {
                                 return d.color;
                             })
                             .attr('opacity', 1);
@@ -427,25 +453,36 @@ define([
                             .attr('x', textXOffset)       //magic numbers make things look pretty!
                             .attr('y', textYOffset)
                             .attr('font-size', $vis.options.legendSize)
+                            .style('cursor', 'pointer')
                             .text(function () {
                                 return truncationObj.truncatedText;
                             })
                             .attr('opacity', 1);
 
-                        if (truncationObj.truncated) {
-                            g.selectAll('text')
-                                .on('mouseover', function () {
-                                    $vis.showToolTip({label: truncationObj.text});
-                                })
-                                .on('mouseout', function () {
+                        g.selectAll('text')
+                            .on('mouseover', function (d) {
+                                if (truncationObj.truncated) {
+                                    $vis.showToolTip({label: truncationObj.text})
+                                }
+
+                                if (d.represents) {
+                                    $vis.legendOver(d.represents);
+                                }
+                            })
+                            .on('mouseout', function (d) {
+                                if (truncationObj.truncated) {
                                     $vis.hideToolTip();
-                                });
-                        }
+                                }
+                                if (d.represents) {
+                                    $vis.legendOut(d.represents);
+                                }
+                            });
                     });
 
                 legend
                     .exit()
-                    .each(function () {
+                    .each(function (d, i) {
+
                         var g = d3.select(this);
 
                         g.selectAll('path')
@@ -457,20 +494,24 @@ define([
                             .transition().duration(time)
                             .attr('opacity', 0)
                             .remove();
+
+                        g.remove();
                     });
 
                 this.drawnLegend = true;
 
                 return;
-
             },
-            renderULCorner: function () {
-                var ulBounds = this.ULBounds(),
-                    imgSize = new Size(
+            renderULCorner: function renderULCorner() {
+
+                var ulBounds = this.ULBounds();
+
+                var imgSize = new Size(
                     ulBounds.size.width,
                     ulBounds.size.height
-                    ),
-                    inset = 5;
+                    );
+
+                var inset = 5;
 
                 imgSize.width -= inset;
                 imgSize.height -= inset;
@@ -503,7 +544,7 @@ define([
                         });
                 }
             },
-            setLegend: function (newLegend) {
+            setLegend: function setLegend(newLegend) {
                 if (newLegend === undefined) {
                     newLegend = this.options.defaultLegend();
                 }
@@ -512,12 +553,43 @@ define([
 
                 this.render();
             },
-            extractLegend: function (dataset) { /* no op in the super class */
+            extractLegend: function extractLegend(dataset) { /* no op in the super class */
             },
-            setDataset: function (newDataset) {
+            setJSONDataset: function (json_url) {
+                var $vis = this;
+
+                $.ajax(json_url, {dataType: 'json'}).then(function (d) {
+
+                    if (d.data && !d.dataset) {
+                        d.dataset = d.data;
+                    }
+
+                    if (d.dataset) {
+
+                        $vis.setDataset(d.dataset);
+
+                        if (d.xLabel) {
+                            $vis.setXLabel(d.xLabel);
+                        }
+                        if (d.yLabel) {
+                            $vis.setYLabel(d.yLabel);
+                        }
+                    } else {
+                        $vis.setDataset(d);
+                    }
+                }).fail(function (d) {
+                    $vis.$elem.empty();
+                    $vis.$elem
+                        .addClass('alert alert-danger')
+                        .html("Could not load JSON " + json_url + ' : ' + d.responseText);
+                });
+            },
+            setDataset: function setDataset(newDataset) {
+
                 if (newDataset === undefined) {
                     newDataset = this.options.defaultDataset();
                 }
+                ;
 
                 this.setValueForKey('dataset', newDataset);
 
@@ -526,7 +598,6 @@ define([
                 }
 
                 if (this.shouldScaleAxis('y')) {
-                    console.warn("SHOULD SCALE Y, so sets it", this.defaultYDomain());
                     this.setYScaleDomain(this.defaultYDomain());
                 }
 
@@ -536,7 +607,8 @@ define([
 
                 this.render();
             },
-            setDatasets: function (newDatasets) {
+            setDatasets: function setDatasets(newDatasets) {
+
                 if (newDatasets === undefined) {
                     newDatasets = [];
                 }
@@ -552,6 +624,7 @@ define([
 
                 //the remaining children are datasets of this vis.
                 var initKids = function () {
+
                     $me.setDataset(myDataset);
 
                     for (var i = 0; i < newDatasets.length; i++) {
@@ -576,24 +649,28 @@ define([
 
                     $me.render();
                 };
+
                 this.callAfterInit(initKids);
+
             },
-            reenter: function (idx, dataset, $parent) {},
-            childOptions: function (idx, dataset) {
+            reenter: function reenter(idx, dataset, $parent) {},
+            childOptions: function childOptions(idx, dataset) {
                 return $.extend(true, {}, dataset.options || this.options.childOptions || this.options);
             },
-            defaultXDomain: function () {
+            defaultXDomain: function defaultXDomain() {
                 return [0, 100];
             },
-            defaultYDomain: function () {
+            defaultYDomain: function defaultYDomain() {
                 return [0, 100];
             },
-            renderXLabel: function () {
+            renderXLabel: function renderXLabel() {
                 var labelRegionBounds = this[this.options.xLabelRegion + 'Bounds']();
+
+
                 var xLabeldataset = [this.xLabel()];
                 var yOffset = this.options.xLabelOffset;
-                var xLabel = this.D3svg().select(this.region(this.options.xLabelRegion)).selectAll('.xLabel');
 
+                var xLabel = this.D3svg().select(this.region(this.options.xLabelRegion)).selectAll('.xLabel');
                 xLabel
                     .data(xLabeldataset)
                     .text(this.xLabel())
@@ -608,14 +685,19 @@ define([
                     .attr('fill', 'black')
                     .attr('transform', 'translate(0,' + yOffset + ')')
                     .text(this.xLabel());
+                ;
+
             },
-            renderYLabel: function () {
+            renderYLabel: function renderYLabel() {
+
                 var labelRegionBounds = this[this.options.yLabelRegion + 'Bounds']();
+
                 var yLabeldataset = [this.yLabel()];
+
                 var rotation = this.options.yLabelRegion === 'xPadding' ? -90 : 90;
                 var xOffset = this.options.yLabelOffset;
-                var yLabel = this.D3svg().select(this.region(this.options.yLabelRegion)).selectAll('.yLabel');
 
+                var yLabel = this.D3svg().select(this.region(this.options.yLabelRegion)).selectAll('.yLabel');
                 yLabel
                     .data(yLabeldataset)
                     .text(this.yLabel())
@@ -623,7 +705,7 @@ define([
                     .append('text')
                     .attr('class', 'yLabel')
                     .attr('x', labelRegionBounds.size.width / 2)
-                    .attr('y', labelRegionBounds.size.height / 2 + 3)
+                    .attr('y', labelRegionBounds.size.height / 2)
                     .attr('text-anchor', 'middle')
                     .attr('font-size', this.options.yLabelSize)
                     .attr('font-family', 'sans-serif')
@@ -634,14 +716,16 @@ define([
                         + labelRegionBounds.size.height / 2
                         + ')')
                     .text(this.yLabel());
+                ;
+
             },
-            xTickValues: function () {
+            xTickValues: function xTickValues() {
                 return;
             },
-            xTickLabel: function (val) {
+            xTickLabel: function xTickLabel(val) {
                 return val;
             },
-            renderXAxis: function () {
+            renderXAxis: function renderXAxis() {
 
                 var $self = this;
 
@@ -654,7 +738,7 @@ define([
                 }
 
                 var axisTransform = this.options.xAxisRegion === 'yGutter' ? axisRegionBounds.size.height : 0;
-                console.log("RENDERS X WITH TRANSFORM ", this.options.xAxisTransform);
+
                 if (this.options.xAxisTransform) {
                     axisTransform = this.options.xAxisTransform;
                 }
@@ -689,27 +773,51 @@ define([
 
                 var gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion)).select('.xAxis');
 
-                if (gxAxis.empty()) {
+                if (gxAxis[0][0] === undefined) {
                     gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion))
                         .append('g')
                         .attr('class', 'xAxis axis')
                         .attr('fill', this.options.xAxisColor);
                 }
-                console.log("GX AXIS ", gxAxis, gxAxis[0][0].parentNode);
+
 
                 gxAxis[0][0].parentNode.appendChild(gxAxis[0][0]);
 
                 this.D3svg().select(this.region(this.options.xAxisRegion)).selectAll('.xAxis').attr("transform", "translate(0," + axisTransform + ")");
 
-                gxAxis.transition().call(xAxis);
+                if (this.options.xAxisVerticalLabels) {
+                    gxAxis
+                        .selectAll("text")
+                        .attr("transform", function (d, i) {
+                            try {
+                                var bounds = $self.yGutterBounds();
+
+                                var textBounds = this.getBBox();
+                                //bullshit magic numbers. Moving it over by 2/3rds of the width seems to line it up nicely, and down by the height.
+                                return "rotate(90) translate(" + (textBounds.width * 2 / 3) + ",-" + textBounds.height + ")";
+                            } catch (err) {
+                                //firefox is stupid! the first call to getBBox fails because it's not attached yet. Tosses an exception.
+                                return undefined;
+                            }
+                        });
+                }
+
+                var transitionTime = this.renderedXAxis
+                    ? this.options.transitionTime
+                    : 0;
+
+                gxAxis.transition().duration(transitionTime).call(xAxis);
+                this.renderedXAxis = true;
+
             },
-            svg2HTML: function () {
+            svg2HTML: function svg2HTML() {
                 var $container = $.jqElem('div')
                     .append(this.data('$svg'));
 
                 return $container.html();
             },
-            renderYAxis: function () {
+            renderYAxis: function renderYAxis() {
+
                 if (!this.options.shouldRenderYAxis) {
                     return;
                 }
@@ -740,16 +848,21 @@ define([
                         .attr("transform", "translate(" + axisTransform + ",0)");
                 }
 
-                gyAxis.transition().call(yAxis);
+                var transitionTime = this.renderedYAxis
+                    ? this.options.transitionTime
+                    : 0;
+
+                gyAxis.transition().duration(transitionTime).call(yAxis);
+                this.renderedYAxis = true;
             },
-            renderChart: function () {
+            renderChart: function renderChart() {
 
             },
-            setGutter: function (newGutter) {
+            setGutter: function setGutter(newGutter) {
                 this.xGutter(newGutter);
                 this.yGutter(newGutter);
             },
-            setPadding: function (newPadding) {
+            setPadding: function setPadding(newPadding) {
                 this.xPadding(newPadding);
                 this.yPadding(newPadding);
             },
@@ -764,9 +877,13 @@ define([
              +------------------------+
              */
 
-            appendUI: function ($elem) {
+            appendUI: function appendUI($elem) {
+
+                var $vis = this;
+
                 var chartBounds = this.chartBounds();
                 if (chartBounds.size.width !== chartBounds.size.height && this.options.aspectRatio !== 'default') {
+
                     var diff = Math.abs(chartBounds.size.width - chartBounds.size.height);
                     var newHeight = $elem.height();
                     var newWidth = $elem.width();
@@ -786,12 +903,16 @@ define([
                         }
                     }
 
-                    $elem.animate({
-                        'width': newWidth,
-                        'height': newHeight
-                    }, 0);
+                    $elem.animate(
+                        {
+                            'width': newWidth,
+                            'height': newHeight
+                        },
+                        0
+                        );
                     this.width(newWidth);
                     this.height(newHeight);
+
                 }
 
                 var D3svg;
@@ -842,14 +963,34 @@ define([
                         );
 
                     this.data('D3svg', D3svg);
-                } else {
-                    //XXX FUCK! D3svg is pointing to a reference to the parent's D3svg, but that might not yet exist. Which means that I need to rewire fucking everything
-                    //to use a goddamn method instead. Fuck my life.
+                }
+
+                //XXX FUCK! D3svg is pointing to a reference to the parent's D3svg, but that might not yet exist. Which means that I need to rewire fucking everything
+                //to use a goddamn method instead. Fuck my life.
+
+                else {
                     this.$elem = this.options.parent.$elem;
                     this.width(this.$elem.width());
                     this.height(this.$elem.height());
                     D3svg = this.D3svg();
                 }
+
+                if (this.options.rootRegion) {
+                    var rootRegion = $vis.region('root', true);
+                    D3svg = D3svg.selectAll('.' + rootRegion).data([{region: rootRegion}], function (d) {
+                        return d.region;
+                    });
+                    D3svg
+                        .enter()
+                        .append('g')
+                        .attr('class', function (d) {
+                            return d.region;
+                        })
+                        .attr('transform', $.proxy(function (region) {
+                            return $vis.buildTransformation($vis.options.rootRegion);
+                        }, this));
+                }
+
 
                 var regions = [
                     'chart', //add the chart first, because we want it to be at the lowest level.
@@ -865,8 +1006,6 @@ define([
                 ];
 
                 D3svg.selectAll('defs').data([null]).enter().append('defs').attr('class', 'definitions');
-
-                var $vis = this;
 
                 var regionG = D3svg.selectAll('g')
                     .data(regions, function (d) {
@@ -931,16 +1070,7 @@ define([
                                 return d.region;
                             })
                             .attr('transform', function (d) {
-
-                                var transform = $vis.options.transformations[d.r] || $vis.options.transformations.global;//{ translate : {x : 0, y : 0}, scale : {width : .1, height : 1} };
-                                if (transform === undefined) {
-                                    return;
-                                }
-
-                                transform = $.extend(true, {translate: {x: 0, y: 0}, scale: {width: 1, height: 1}}, transform);
-
-                                return 'translate(' + transform.translate.x + ',' + transform.translate.y + ')'
-                                    + ' scale(' + transform.scale.width + ',' + transform.scale.height + ')';
+                                return $vis.buildTransformation($vis.options.transformations[d.r] || $vis.options.transformations.global);
                             });
                     }
                 );
@@ -954,14 +1084,20 @@ define([
                  ;*/
 
             },
-            D3svg: function () {
+            buildTransformation: function buildTransformation(transformation) {
+                var transform = $.extend(true, {translate: {x: 0, y: 0}, scale: {width: 1, height: 1}}, transformation);
+
+                return 'translate(' + transform.translate.x + ',' + transform.translate.y + ')'
+                    + ' scale(' + transform.scale.width + ',' + transform.scale.height + ')';
+            },
+            D3svg: function D3svg() {
                 if (this.options.parent) {
                     return this.options.parent.D3svg();
                 } else {
                     return this.data('D3svg');
                 }
             },
-            region: function (region, asName) {
+            region: function _region(region, asName) {
 
                 var dot = '';
 
@@ -975,55 +1111,55 @@ define([
 
                 return dot + region + '-' + this.options.chartID;
             },
-            ULBounds: function () {
+            ULBounds: function ULBounds() {
                 return new Rectangle(
                     new Point(0, 0),
                     new Size(this.xPadding(), this.yGutter())
                     );
             },
-            URBounds: function () {
+            URBounds: function URBounds() {
                 return new Rectangle(
                     new Point(this.xPadding() + this.chartBounds().size.width, 0),
                     new Size(this.xGutter(), this.yGutter())
                     );
             },
-            LLBounds: function () {
+            LLBounds: function LLBounds() {
                 return new Rectangle(
                     new Point(0, this.yGutter() + this.chartBounds().size.height),
                     new Size(this.xPadding(), this.yPadding())
                     );
             },
-            LRBounds: function () {
+            LRBounds: function LRBounds() {
                 return new Rectangle(
                     new Point(this.xPadding() + this.chartBounds().size.width, this.yGutter() + this.chartBounds().size.height),
                     new Size(this.xPadding(), this.yPadding())
                     );
             },
-            xPaddingBounds: function () {
+            xPaddingBounds: function xPaddingBounds() {
                 return new Rectangle(
                     new Point(0, this.yGutter()),
                     new Size(this.xPadding(), this.chartBounds().size.height)
                     );
             },
-            xGutterBounds: function () {
+            xGutterBounds: function xGutterBounds() {
                 return new Rectangle(
                     new Point(this.xPadding() + this.chartBounds().size.width, this.yGutter()),
                     new Size(this.xGutter(), this.chartBounds().size.height)
                     );
             },
-            yGutterBounds: function () {
+            yGutterBounds: function yGutterBounds() {
                 return new Rectangle(
                     new Point(this.xPadding(), 0),
                     new Size(this.chartBounds().size.width, this.yGutter())
                     );
             },
-            yPaddingBounds: function () {
+            yPaddingBounds: function yPaddingBounds() {
                 return new Rectangle(
                     new Point(this.xPadding(), this.yGutter() + this.chartBounds().size.height),
                     new Size(this.chartBounds().size.width, this.yPadding())
                     );
             },
-            chartBounds: function () {
+            chartBounds: function chartBounds() {
 
                 var widgetWidth = this.$elem.width();
                 var widgetHeight = this.$elem.height();
@@ -1047,7 +1183,7 @@ define([
                 return chart;
 
             },
-            showToolTip: function (args) {
+            showToolTip: function showToolTip(args) {
 
                 if (args.event === undefined) {
                     args.event = d3.event;
@@ -1057,13 +1193,13 @@ define([
                     .style('display', 'block')
                     .html(args.label)
                     .style("left", (args.event.pageX + 10) + "px")
-                    .style("top", (args.event.pageY - 10) + "px");
+                    .style("top", (args.event.pageY - 10) + "px")
+                    .style('max-width', (args.maxWidth || '300') + 'px');
             },
-            hideToolTip: function (args) {
+            hideToolTip: function hideToolTip(args) {
                 d3.selectAll('.visToolTip').style('display', 'none');
             },
-            radialGradient: function (grad) {
-
+            radialGradient: function radialGradient(grad) {
                 grad = $.extend(
                     true,
                     {
@@ -1080,7 +1216,7 @@ define([
                 /*$.each(
                  this.radialGradients(),
                  function (key, val) {
-                 if (val == grad.id) {
+                 if (val === grad.id) {
                  return val;
                  }
                  }
@@ -1165,7 +1301,7 @@ define([
                 return this.radialGradients()[gradKey] = grad.id;
 
             },
-            linearGradient: function (grad) {
+            linearGradient: function linearGradient(grad) {
 
                 var chartBounds = this.chartBounds();
 
@@ -1228,7 +1364,8 @@ define([
                     .attr('y2', function (d) {
                         return d.y2;
                     })
-                    .attr('spreadMethod', 'pad');
+                    .attr('spreadMethod', 'pad')
+                    ;
 
                 var transitionTime = newGrad
                     ? 0
@@ -1238,19 +1375,25 @@ define([
 
                 gradStops
                     .enter()
-                    .append('stop');
+                    .append('stop')
+                    ;
 
                 gradStops
                     .transition().duration(transitionTime)
                     .attr('offset', function (d, i) {
-                        var num = 0;
-                        if (i === grad.colors.length - 1) {
-                            num = 1;
-                        } else if (i > 0) {
-                            num = i / (grad.colors.length - 1);
-                        }
+                        if (grad.gradStops) {
+                            return grad.gradStops[i];
+                        } else {
 
-                        return (Math.round(10000 * num) / 100) + '%';
+                            var num = 0;
+                            if (i === grad.colors.length - 1) {
+                                num = 1;
+                            } else if (i > 0) {
+                                num = i / (grad.colors.length - 1);
+                            }
+
+                            return (Math.round(10000 * num) / 100) + '%';
+                        }
                     })
                     .attr('stop-color', function (d) {
                         return d;
@@ -1260,13 +1403,14 @@ define([
                 return this.linearGradients()[gradKey] = grad.id;
 
             },
-            wrap: function (text, width, xCoord) {
+            wrap: function wrap(text, width, xCoord) {
 
                 if (xCoord === undefined) {
                     xCoord = function () {
                         return 0;
                     };
-                };
+                }
+                ;
 
                 text.each(function () {
                     var text = d3.select(this),
@@ -1282,7 +1426,8 @@ define([
                         .append("tspan")
                         .attr("x", xCoord)
                         .attr("y", y)
-                        .attr("dy", dy + "em");
+                        .attr("dy", dy + "em")
+                        ;
 
                     while (word = words.pop()) {
                         line.push(word);
@@ -1295,19 +1440,20 @@ define([
                                 .attr("x", xCoord)
                                 .attr("y", y).
                                 attr("dy", lineHeight + 'em')//++lineNumber * lineHeight + dy + "em")
-                                .text(word);
+                                .text(word)
+                                ;
                         }
                     }
                 });
             },
-            absPos: function (obj) {
+            absPos: function absPos(obj) {
 
                 var box = obj.getBBox();
                 var matrix = obj.getScreenCTM();
 
                 return {x: box.x + matrix.e, y: box.y + matrix.f};
             },
-            endall: function (transition, callback) {
+            endall: function endall(transition, callback) {
                 var n = 0;
                 transition
                     .each(function () {
@@ -1318,9 +1464,9 @@ define([
                             callback.apply(this, arguments);
                     });
             },
-            uniqueness: function (uniqueFunc) {
+            uniqueness: function uniqueness(uniqueFunc) {
                 if (uniqueFunc === undefined) {
-                    uniqueFunc = this.uniqueID;
+                    uniqueFunc = this.options.uniqueFunc || this.uniqueID;
                 }
 
                 return this.options.useUniqueID

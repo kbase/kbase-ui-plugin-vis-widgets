@@ -14,9 +14,11 @@ define([
         options: {
         },
         _accessors: [
-            'labels'
+            'labels',
         ],
         xTickValues: function () {
+            var $ls = this;
+
             var m = d3.merge(
                 this.dataset().map(function (d) {
                 return d.values.map(function (l) {

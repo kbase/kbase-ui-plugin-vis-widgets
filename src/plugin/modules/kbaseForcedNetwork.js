@@ -4,13 +4,13 @@ define([
     'jquery',
     'd3',
     'kb_vis_RGBColor',
-    'kb/widget/legacy/searchControls',
-    'kb_vis_visWidget',
     'kb_vis_rectangle',
     'kb_vis_point',
-    'kb_vis_size'
+    'kb_vis_size',
+    'kb_vis_visWidget',
+    'kb/widget/legacy/searchControls'
 ],
-    function ($, d3, RGBColor) {
+    function ($, d3, RGBColor, Rectangle, Point, Size) {
         'use strict';
 
         $.KBWidget({
@@ -108,6 +108,7 @@ define([
 
                 chart
                     .on('mousedown', function () {
+
                         if (d3.select(d3.event.target).attr('class') !== 'background') {
                             return;
                         }
@@ -189,10 +190,13 @@ define([
                         $force.restart()();
 
                     });
+
                 return this;
+
             },
             renderChart: function () {
-                if (this.dataset() === undefined) {
+
+                if (this.dataset() == undefined) {
                     return;
                 }
 
@@ -343,7 +347,7 @@ define([
 
                             $force.forceLayout().links().forEach(
                                 function (link, idx) {
-                                    if (link.highlighted !== 2) {
+                                    if (link.highlighted != 2) {
                                         link.highlighted = -1;
                                     }
                                 }
@@ -351,7 +355,7 @@ define([
 
                             $force.forceLayout().nodes().forEach(
                                 function (node, idx) {
-                                    if (node.highlighted !== 2 && node.highlighted !== 1) {
+                                    if (node.highlighted != 2 && node.highlighted != 1) {
                                         node.highlighted = -1;
                                     }
                                 }
@@ -466,7 +470,7 @@ define([
                                         link.highlighted = 1;
                                     }
 
-                                    if (link.highlighted !== 1) {
+                                    if (link.highlighted != 1) {
                                         link.highlighted = -1;
                                     }
                                 }
@@ -612,8 +616,7 @@ define([
                             })
                             .attr('data-name', function (d) {
                                 return d.name;
-                            })
-                            ;
+                            });
 
                         return this;
                     };
@@ -650,8 +653,7 @@ define([
                             .attr('alignment-baseline', 'middle')
                             .attr('style', function (d) {
                                 return d.tagStyle;
-                            })
-                            ;
+                            });
 
                         return this;
                     };
@@ -681,11 +683,8 @@ define([
                 $force.restart(start);
 
                 start();
-
-
             },
             renderXAxis: function () {},
             renderYAxis: function () {}
         });
-
     });

@@ -58,7 +58,7 @@ define([
                             parent.nodeDepth = nodeDepth;
                         }
 
-                        nodeDepth++;
+                        nodeDepth += 1;
                         parent = parent.parent;
                     }
                 }
@@ -253,6 +253,8 @@ define([
 
             var chartOffset = 0;
 
+
+
             var maxOffset = 0;
             var minOffset = 5000000000;
 
@@ -372,7 +374,8 @@ define([
                 .attr('opacity', 0)
                 .attr("transform", function (d) {
                     return "translate(" + source.y0 + "," + source.x0 + ")";
-                });
+                })
+                ;
 
             nodeEnter.append("circle")
                 .attr("class", "circle")
@@ -420,8 +423,7 @@ define([
                     } else if (d.tooltip) {
                         $tree.hideToolTip();
                     }
-                })
-                ;
+                });
 
             nodeEnter.append("text")
                 //.attr('style', 'font-size : 11px')
@@ -481,7 +483,6 @@ define([
                     $tree.options.nodeEnterCallback.call($tree, d, i, this, duration);
                 }
             });
-
 
             // Transition nodes to their new position.
             var nodeUpdate = node.transition()
@@ -716,12 +717,10 @@ define([
 
                     return "M" + yCoords.source + ',' + d.source.x +
                         'L' + yCoords.source + ',' + d.target.x +
-                        'L' + yCoords.target + ',' + d.target.x
-                        ;
+                        'L' + yCoords.target + ',' + d.target.x;
                 };
             } else if (this.options.lineStyle === 'step') {
                 this.diagonal = function (d) {
-
                     var yCoords = getYCoords(d);
 
                     var halfY = (yCoords.target - yCoords.source) / 2 + yCoords.source;

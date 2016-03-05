@@ -22,6 +22,7 @@ define([
                 gfgColor: '#FF0000',
                 highlightColor: 'cyan',
                 colorScale: function (idx, data, $pie) {
+
                     if ($pie.colorScale === undefined) {
 
                         var domain = [0, 1];
@@ -38,12 +39,13 @@ define([
 
                     return $pie.colorScale(data.val);
 
-                }
+                },
             },
             _accessors: [
                 {name: 'datasets', setter: 'setDatasets'}
             ],
             init: function (options) {
+
                 this._super(options);
 
                 if (this.options.parent) {
@@ -56,6 +58,7 @@ define([
                 return this;
             },
             setDatasets: function (newDatasets) {
+
                 var $me = this;
                 var _super = $me._super;
                 var sd = function () {
@@ -85,10 +88,13 @@ define([
 
             },
             sliceAction: function ($pie) {
+
                 var radius = $pie.outerRadius();
 
                 return function () {
+
                     this.on('mouseover', function (d) {
+
                         if (d.data.gap) {
                             return;
                         }
@@ -117,7 +123,6 @@ define([
                                 }
                             );
                         }
-
                     })
                         .on('mouseout', function (d) {
                             if (d.data.gap) {
@@ -133,15 +138,18 @@ define([
                             });
                         })
                         .on('dblclick', function (d) {
+
                             if (d.data.gap) {
                                 return;
                             }
 
                             if ($pie.options.draggable) {
+
                                 $pie.options.startAngle = $pie.options.startAngle - d.startAngle;
                                 $pie.renderChart();
                             }
-                        });
+                        })
+                        ;
                     return this;
                 };
             }

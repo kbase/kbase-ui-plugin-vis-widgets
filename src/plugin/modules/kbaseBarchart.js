@@ -43,10 +43,12 @@ define([
                     if ($.isArray(d.value)) {
                         if (d.stacked) {
                             return d3.sum(d.value);
+                        } else {
+                            return d3.min(d.value);
                         }
-                        return d3.min(d.value);
+                    } else {
+                        return d.value;
                     }
-                    return d.value;
                 }
             )
                 );
@@ -63,10 +65,12 @@ define([
                         if ($.isArray(d.value)) {
                             if (d.stacked) {
                                 return d3.sum(d.value);
+                            } else {
+                                return d3.max(d.value);
                             }
-                            return d3.max(d.value);
+                        } else {
+                            return d.value;
                         }
-                        return d.value;
                     }
                 )
                     )
@@ -89,9 +93,9 @@ define([
             );
 
             this.setLegend(legend);
-
         },
         renderChart: function renderChart() {
+
             if (this.dataset() === undefined) {
                 return;
             }
@@ -109,11 +113,7 @@ define([
                     this
                         //.attr('width', 0)
                         //.attr('height', 0)
-                        .attr('x', bounds.origin.x + bounds.size.width)
-                        //.attr('y', 0)
-                        .attr('opacity', 0);
-                } else {
-                    this
+                        //.attr('x', bounds.origin.x + bounds.size.width)
                         .attr('x', function (b, j) {
                             var xId = d.bar;
                             if ($bar.options.useIDMapping) {
@@ -122,23 +122,38 @@ define([
 
                             return $bar.xScale()(xId) + barScale(d.stacked ? 0 : j);
                         })
-                        .attr('opacity', 1);
+                        .attr('y', bounds.origin.x + bounds.size.height)
+                        .attr('height', 0)
+                        .attr('opacity', 0);
+                } else {
+
+                    this
+                        .attr('x', function (b, j) {
+
+                            var xId = d.bar;
+                            if ($bar.options.useIDMapping) {
+                                xId = $bar.xIDMap()[xId];
+                            }
+
+                            return $bar.xScale()(xId) + barScale(d.stacked ? 0 : j);
+                        })
+                        .attr('opacity', 1)
+                        .attr('y', function (b, bi) {
+
+                            var barHeight = b;
+                            if (d.stacked && $.isArray(d.value)) {
+                                barHeight = d3.sum(d.value.slice(0, bi + 1));
+                            }
+
+                            return $bar.yScale()(Math.max(0, barHeight));
+                        })
+                        .attr('height', function (b, bi) {
+                            return Math.abs($bar.yScale()(0) - $bar.yScale()(b));
+                        });
                 }
 
                 this
-                    .attr('y', function (b, bi) {
-
-                        var barHeight = b;
-                        if (d.stacked && $.isArray(d.value)) {
-                            barHeight = d3.sum(d.value.slice(0, bi + 1));
-                        }
-
-                        return $bar.yScale()(Math.max(0, barHeight));
-                    })
                     .attr('width', barScale.rangeBand())
-                    .attr('height', function (b, bi) {
-                        return Math.abs($bar.yScale()(0) - $bar.yScale()(b));
-                    })
                     .attr('fill', function (b, j) {
                         return d.color[ j % d.color.length ];
                     })
@@ -173,9 +188,11 @@ define([
                             .attr("fill",
                                 function (r, ri) {
                                     if (r === xId) {
+                                        this.oldFill = d3.select(this).attr('fill');
+                                        this.hasOldFill = true;
                                         return $bar.options.overColor;
                                     } else {
-                                        return 'black';
+                                        return d3.select(this).attr('fill');
                                     }
                                 }
                             );
@@ -189,10 +206,14 @@ define([
                             ? d.label[j % d.label.length]
                             : xIdLabel + ' is ' + d.value[j % d.value.length];//'pop up information!';
 
+                        var tooltip = d.tooltip
+                            ? d.tooltip[j % d.tooltip.length]
+                            : label;
+
                         if (label !== undefined) {
                             $bar.showToolTip(
                                 {
-                                    label: label
+                                    label: tooltip
                                 }
                             );
                         }
@@ -212,7 +233,12 @@ define([
                             $bar.data('D3svg').select('.yPadding').selectAll('g g text')
                                 .attr("fill",
                                     function (r, ri) {
-                                        return 'black';
+                                        if (this.hasOldFill) {
+                                            this.hasOldFill = false;
+                                            return this.oldFill;
+                                        } else {
+                                            return d3.select(this).attr('fill');
+                                        }
                                     }
                                 );
                             $bar.hideToolTip();
@@ -241,6 +267,10 @@ define([
                         d.label = [d.label];
                     }
 
+                    if (d.tooltip !== undefined && !$.isArray(d.tooltip)) {
+                        d.tooltip = [d.tooltip];
+                    }
+
                     //var barDomain = d.value;
                     //if (d.stacked && $.isArray(d.value)) {
                     //    barDomain = [d3.sum(d.value)];
@@ -258,23 +288,25 @@ define([
                     var barScale = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([0,$bar.xScale().rangeBand()])
-                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05);
+                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05)
+                        ;
 
                     var barScale2 = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([85])
-                        .rangeBands([0, 85], 0.05);
+                        .rangeBands([0, 85], 0.05)
+                        ;
 
-                    d3.select(this).selectAll('.bar')
+                    d3.select(this).selectAll('.barcharBar')
                         .data(d.value)
                         .enter()
                         .append('rect')
-                        .attr('class', 'bar')
+                        .attr('class', 'barcharBar')
                         .call(function () {
                             return funkyTown.call(this, barScale, d, i, true);
                         });
 
-                    d3.select(this).selectAll('.bar')
+                    d3.select(this).selectAll('.barcharBar')
                         .data(d.value)
                         .call(function () {
                             return mouseAction.call(this, d, i);
@@ -284,6 +316,14 @@ define([
                         .call(function () {
                             return funkyTown.call(this, barScale, d, i);
                         });
+
+                    d3.select(this).selectAll('.barcharBar')
+                        .data(d.value)
+                        .exit()
+                        .transition().duration(transitionTime)
+                        .attr('x', bounds.origin.x + bounds.size.width)
+                        .attr('opacity', 0);
+                    //.each('end', function(d) { d3.select(this).remove() } )
 
                 });
                 return this;
@@ -314,40 +354,44 @@ define([
             var chart = this.D3svg().select(this.region('chart')).selectAll('.barGroup');
 
             chart
-                .data(this.dataset())
+                .data(this.dataset(), $bar.uniqueness())
                 .enter()
                 .append('g')
                 .attr('class', 'barGroup')
-                .call(groupAction);
+                .call(groupAction)
+                ;
 
             chart
-                .data(this.dataset())
-                .call(groupAction);
+                .data(this.dataset(), $bar.uniqueness())
+                .call(groupAction)
+                ;
 
             chart
-                .data(this.dataset())
+                .data(this.dataset(), $bar.uniqueness())
                 .exit()
                 .call(
                     function nuke() {
                         this.each(function (d, i) {
-                            d3.select(this).selectAll('.bar')
+
+                            d3.select(this).selectAll('.barcharBar')
                                 .transition()
                                 .duration(transitionTime)
-                                .attr('x', bounds.origin.x + bounds.size.width)
-                                .attr('opacity', 0);
+                                .attr('y', function (d) {
+                                    /*var x = d3.select(this).attr('x');
+                                     var xDest = x < bounds.origin.x + bounds.size.width / 2
+                                     ? bounds.origin.x
+                                     : bounds.origin.x + bounds.size.width;*/
+                                    return bounds.origin.x + bounds.size.height;
+                                })
+                                .attr('opacity', 0)
+                                .each('end', function () {
+                                    d3.select(this.parentNode).remove();
+                                });
                         });
                     }
-                )
-                /*                    .transition()
-                 .duration(transitionTime)
-                 .attr('x', 0)
-                 .attr('opacity', 0)*/
-//                        .remove()
-                ;
+                );
 
             if (this.options.zeroLine) {
-
-
                 var zeroLine = this.D3svg().select(this.region('chart')).selectAll('.zeroLine');
 
                 zeroLine
@@ -384,7 +428,6 @@ define([
         },
         setYScaleRange: function setYScaleRange(range, yScale) {
             return this._super(range.reverse(), yScale.nice());
-
         }
     });
 });

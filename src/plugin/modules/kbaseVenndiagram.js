@@ -30,7 +30,7 @@ define([
                 if ($venn.fillScale === undefined) {
                     $venn.fillScale = d3.scale.category20();
                 }
-                ;
+                
                 if ($venn.circleColors === undefined) {
                     $venn.circleColors = [];
                 }
@@ -137,12 +137,12 @@ define([
 
             var i1 = {
                 x: midPoint.x + Math.cos(complementAngle) * distance, //c1.r * Math.sqrt(3) / 2,
-                y: midPoint.y - Math.sin(complementAngle) * distance //c1.r * Math.sqrt(3) / 2,
+                y: midPoint.y - Math.sin(complementAngle) * distance, //c1.r * Math.sqrt(3) / 2,
             };
 
             var i2 = {
                 x: midPoint.x + Math.cos(complementAngle + Math.PI) * distance, //c1.r * Math.sqrt(3) / 2,
-                y: midPoint.y - Math.sin(complementAngle + Math.PI) * distance //c1.r * Math.sqrt(3) / 2,
+                y: midPoint.y - Math.sin(complementAngle + Math.PI) * distance, //c1.r * Math.sqrt(3) / 2,
             };
 
             var mag1 = Math.sqrt(Math.pow(i1.x, 2) + Math.pow(i1.y, 2));
@@ -153,9 +153,6 @@ define([
                 : [i2, i1, midPoint];
 
             return ret;
-
-            return [i1, i2, midPoint];
-
         },
         renderChart: function () {
             var bounds = this.chartBounds();
@@ -180,7 +177,7 @@ define([
                     + ')'
                     );
 
-            radius = radius * .5;   //basically just guessing at a magic number that looks reasonably good
+            radius = radius * 0.5;   //basically just guessing at a magic number that looks reasonably good
 
             radius = this.options.radius || radius;
             var overlap = this.options.overlap;
@@ -210,11 +207,9 @@ define([
                 }
             ];
 
-
             var intersects = this.intersectCircles(circleData[0], circleData[1]);
             var intersects2 = this.intersectCircles(circleData[1], circleData[2]);
             var intersects3 = this.intersectCircles(circleData[0], circleData[2]);
-
 
             var labelData = [//];/*
                 {
@@ -303,11 +298,9 @@ define([
                 : 0;
 
             var circleAction = function () {
-
                 this
                     .on('mouseover', function (d) {
                         d3.select(this).attr('fill-opacity', 1);
-
 
                         if ($venn.options.tooltips) {
                             var tooltip = $venn.tooltip(d);
@@ -324,10 +317,8 @@ define([
                                 );
                             }
                         }
-
                     })
                     .on('mouseout', function (d) {
-
                         var target = d3.event.toElement;
 
                         //assume that if we've moused over text, that that means we're over the label.
@@ -414,7 +405,8 @@ define([
             var arcs = venn.selectAll('.arc').data(arcs);
             arcs.enter()
                 .append('path')
-                .attr('class', 'arc');
+                .attr('class', 'arc')
+                ;
             arcs
                 .call(circleAction)
                 .transition().duration(transitionTime)
@@ -461,12 +453,12 @@ define([
                 })
                 .attr('stroke-width', function (d) {
                     return d.strokeWidth || $venn.options.strokeWidth;
-                })
-                ;
+                });
 
             strokedCircles.exit().remove();
 
             var labelTown = function (opacity) {
+
                 if (opacity === undefined) {
                     opacity = 1;
                 }
@@ -508,7 +500,6 @@ define([
                         .attr('font-size', function (d) {
                             return d.fontSize || '12pt';
                         });
-
                 }
 
                 return this;
@@ -526,6 +517,9 @@ define([
                     .call(labelTown);
                 labels.exit().remove();
             }
+
+
+
         },
         tooltip: function (d) {
             if (d.data.tooltip !== undefined) {

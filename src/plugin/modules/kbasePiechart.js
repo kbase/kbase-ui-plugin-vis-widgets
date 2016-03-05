@@ -34,7 +34,7 @@ define([
             labels: true,
             autoEndAngle: false,
             colorScale: d3.scale.category20(),
-            outerArcOpacity: .4,
+            outerArcOpacity: 0.4,
             cornerToolTip: false,
             draggable: true,
             tooltips: true,
@@ -358,13 +358,10 @@ define([
                     })
                     .attr('stroke-opacity', function (d) {
                         return d.data.gap ? 0 : 1;
-                    })
-                    ;
-
+                    });
 
                 if (!$pie.options.gradient) {
                     this.attr('fill', function (d, idx) {
-
                         if (d.data.color === undefined) {
                             d.data.color = $pie.options.colorScale(idx, d.data, $pie);
                         }
@@ -461,8 +458,7 @@ define([
                             return function (t) {
                                 return arcMaker(interpolate(t));
                             };
-                        })
-                        ;
+                        });
                 }
 
                 return this;
@@ -470,11 +466,13 @@ define([
             };
 
             var labelTown = function labelTown(opacity) {
+
                 if (opacity === undefined) {
                     opacity = 1;
                 }
 
-                this.attr("text-anchor", "middle");
+                this
+                    .attr("text-anchor", "middle");
 
                 if (this.attrTween) {
 
@@ -548,7 +546,6 @@ define([
                             };
                         });
                 }
-
 
                 return this;
             };
@@ -644,7 +641,6 @@ define([
                     .attr('fill', $pie.options.pieColor);
             }
 
-
             $pie.outerArc = pie.selectAll('.outerArc').data([0]);
 
             $pie.outerArc
@@ -713,8 +709,7 @@ define([
                 })
                 .each('end', function (d) {
                     d3.select(this).remove();
-                })
-                ;
+                });
 
             var labelG = this.D3svg().select(this.region('chart')).selectAll('.labelG').data([0]);
             labelG.enter().append('g')
@@ -824,19 +819,14 @@ define([
 
             var lines = labelG
                 .selectAll('polyline')
-                .data(
-                    pieData
-                    .filter(function (d) {
-                        return (
-                            ($pie.options.labels || d.data.forceLabel)
-                            && ($pie.options.outsideLabels || d.data.outsideLabel)
-                            && d.data.label !== undefined
-                            && d.data.label.length
-                            );
-                    })
-                    ,
-                    this.uniqueness()
-                    );
+                .data(pieData.filter(function (d) {
+                    return (
+                        ($pie.options.labels || d.data.forceLabel)
+                        && ($pie.options.outsideLabels || d.data.outsideLabel)
+                        && d.data.label !== undefined
+                        && d.data.label.length
+                        );
+                }), this.uniqueness());
 
             lines
                 .enter()

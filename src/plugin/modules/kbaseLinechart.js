@@ -15,6 +15,7 @@ define([
             options: {
                 overColor: 'yellow',
                 useOverLine: true,
+                highlightToFront: false,
                 useLineLabelToolTip: true,
                 lineWidth: 3,
                 lineCap: 'round',
@@ -34,24 +35,30 @@ define([
             },
             _accessors: [
             ],
+            legendOver: function legendOver(d) {
+
+                d.svg.parentNode.appendChild(d.svg);
+
+            },
+            legendOut: function legendOut(d) {
+
+            },
             extractLegend: function (dataset) {
 
                 var legend = [];
-                dataset.forEach(
-                    function (line, idx) {
-                        legend.push(
-                            {
-                                color: line.strokeColor,
-                                label: line.label,
-                                shape: line.shape
-                            }
-                        );
-                    }
-                );
+                dataset.forEach(function (line, idx) {
+                    legend.push({
+                        color: line.strokeColor,
+                        label: line.label,
+                        shape: line.shape,
+                        represents: line
+                    });
+                });
 
                 this.setLegend(legend);
             },
             setDataset: function (dataset) {
+
                 var $line = this;
 
                 dataset.forEach(
@@ -78,7 +85,7 @@ define([
                                     } else {
                                         point.x = xIdx;
                                     }
-                                    if (point.y2) {
+                                    if (point.y2 !== undefined) {
                                         revLine.push({x: point.x, y: point.y2});
                                         delete point.y2;
                                     }
@@ -91,7 +98,6 @@ define([
                                 }
                                 line.values.push(line.values[0]);
                             }
-
                         }
                     }
                 );
@@ -178,7 +184,6 @@ define([
                     });
 
                 var funkyTown = function () {
-
                     this
                         .attr('d', function (d) {
                             return lineMaker(d.values);
@@ -206,20 +211,19 @@ define([
                         });
 
                     return this;
-
                 };
 
                 var mouseAction = function () {
 
-                    if (!$line.options.useOverLine) {
-                        return;
-                    }
+                    //if (! $line.options.useOverLine) {
+                    //    return;
+                    //}
 
                     this.on('mouseover', function (d) {
-                        if ($line.options.overColor) {
+                        if ($line.options.useOverLine && $line.options.overColor) {
                             d3.select(this)
                                 .attr('stroke', $line.options.overColor)
-                                .attr('stroke-width', (d.width || $line.options.lineWidth) + 5);
+                                .attr('stroke-width', (d.width || $line.options.lineWidth) + .5);
                         }
 
                         if (d.label && $line.options.useLineLabelToolTip) {
@@ -230,9 +234,13 @@ define([
                             );
                         }
 
+                        if ($line.options.highlightToFront) {
+                            d.svg.parentNode.appendChild(d.svg);
+                        }
+
                     })
                         .on('mouseout', function (d) {
-                            if ($line.options.overColor) {
+                            if ($line.options.useOverLine && $line.options.overColor) {
                                 d3.select(this)
                                     .attr('stroke', function (d) {
                                         return d.strokeColor || $line.options.strokeColor;
@@ -240,12 +248,12 @@ define([
                                     .attr('stroke-width', function (d) {
                                         return d.width !== undefined ? d.width : $line.options.lineWidth;
                                     });
-
-                                if ($line.options.useLineLabelToolTip) {
-                                    $line.hideToolTip();
-                                }
-
                             }
+
+                            if ($line.options.useLineLabelToolTip) {
+                                $line.hideToolTip();
+                            }
+
                         });
                     return this;
                 };
@@ -281,7 +289,10 @@ define([
                     .append('path')
                     .attr('class', 'line')
                     .call(funkyTown)
-                    .call(mouseAction);
+                    .call(mouseAction)
+                    .each(function (d) {
+                        d.svg = this;
+                    });
 
                 chart
                     .call(mouseAction)
@@ -297,8 +308,8 @@ define([
 
                 var pointsData = [];
                 this.dataset().forEach(function (line, i) {
-
                     line.values.forEach(function (point, i) {
+
                         if (line.shape || point.shape) {
                             var newPoint = {};
                             for (var key in point) {
@@ -389,8 +400,7 @@ define([
                         .attr('opacity', 0)
                         .attr('stroke', this.options.highlightLineColor)
                         .attr('stroke-width', this.options.highlightLineWidth)
-                        .attr('pointer-events', 'none')
-                        ;
+                        .attr('pointer-events', 'none');
 
                     this.data('D3svg').select(this.region('chart'))
                         .on('mouseover', function (d) {

@@ -31,13 +31,12 @@ define([
             shouldRenderYAxis: false
         },
         setDataset: function (dataset) {
+
             var sparkValues = dataset;
 
-            dataset = [
-                {
+            dataset = [{
                     values: dataset
-                }
-            ];
+                }];
 
             this._super(dataset);
 
