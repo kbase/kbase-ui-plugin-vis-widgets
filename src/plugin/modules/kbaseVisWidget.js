@@ -780,7 +780,7 @@ define([
 
                 var gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion)).select('.xAxis');
 
-                if (gxAxis[0][0] === undefined) {
+                if (!gxAxis[0][0]) {
                     gxAxis = this.D3svg().select(this.region(this.options.xAxisRegion))
                         .append('g')
                         .attr('class', 'xAxis axis')
@@ -848,7 +848,7 @@ define([
                 var axisRegionBounds = this[this.options.yAxisRegion + 'Bounds']();
                 var axisTransform = this.options.yAxisRegion === 'xPadding' ? axisRegionBounds.size.width : 0;
 
-                if (gyAxis[0][0] === undefined) {
+                if (!gyAxis[0][0]) {
                     gyAxis = this.D3svg().select(this.region(this.options.yAxisRegion))
                         .append('g')
                         .attr('class', 'yAxis axis')
