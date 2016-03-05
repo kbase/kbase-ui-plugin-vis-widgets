@@ -14,7 +14,7 @@ define([
         options: {
         },
         _accessors: [
-            'labels',
+            'labels'
         ],
         xTickValues: function () {
             var $ls = this;
