@@ -2,10 +2,8 @@
 ---
 package:
     author: Jim Thomason
-    name: vis_widgets
+    name: viswidgets
     description: Vis widgets
-    date: August 9, 2015
-    version: 0.0.1
 source:
     ## sources are relative to build/plugins/PACKAGE/source/javascript
     ## NB: need to quote file names, otherwise 
