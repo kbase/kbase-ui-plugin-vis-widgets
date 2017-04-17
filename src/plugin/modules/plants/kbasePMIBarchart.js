@@ -41,30 +41,28 @@
  );
  
  */
-/*global define*/
-/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
     'bluebird',
-    'kb/service/client/workspace',
+    'kb_service/client/workspace',
     'kb_vis_barChart',
-    'kb/widget/legacy/authenticatedWidget',
+    'kb_widget/legacy/authenticatedWidget',
     'bootstrap'
 ], function ($, d3, Promise, Workspace) {
     'use strict';
 
     $.KBWidget({
-        name: "kbasePMIBarchart",
-        parent: "kbaseAuthenticatedWidget",
-        version: "1.0.0",
+        name: 'kbasePMIBarchart',
+        parent: 'kbaseAuthenticatedWidget',
+        version: '1.0.0',
         options: {
             subsystem_annotation_object: 'PlantSEED_Subsystems',
             subsystem_annotation_workspace: 'PlantSEED',
-            selected_subsystems: ["Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants"]
+            selected_subsystems: ['Central Carbon: Glycolysis_and_Gluconeogenesis_in_plants']
         },
         _accessors: [
-            {name: 'dataset', setter: 'setDataset'}
+            { name: 'dataset', setter: 'setDataset' }
         ],
         setDataset: function setDataset(newDataset) {
 
@@ -88,8 +86,8 @@ define([
                     var func = keys[f];
 
                     var name = func.replace(/_/g, ' ');
-                    var group = name.replace(/:.+/, "");
-                    var sub_name = name.replace(/.+:\s*/, "");
+                    var group = name.replace(/:.+/, '');
+                    var sub_name = name.replace(/.+:\s*/, '');
 
                     this.data('selectbox')
                         .append(
@@ -98,7 +96,7 @@ define([
                             .prop('selected', f === 0 ? true : false)
                             .css('background-color', colorScale(f))
                             .append(name)
-                            );
+                        );
 
                     for (var bar = 0; bar < newDataset.subsystems[func].length; bar++) {
                         newDataset.subsystems[func][bar].color = colorScale(f);
@@ -108,7 +106,7 @@ define([
 
                         var $groupButton = $.jqElem('div')
                             .addClass('btn-group dropup')
-                            .css({'padding-right': '5px'})
+                            .css({ 'padding-right': '5px' })
                             .append(
                                 $.jqElem('button')
                                 .attr('type', 'button')
@@ -118,7 +116,7 @@ define([
                                     .css('display', 'none')
                                     .addClass('check fa fa-check')
                                     .append('&nbsp;')
-                                    )
+                                )
                                 .append(group)
                                 .on('click', function (e) {
                                     /*var isOpen = $(this).parent().hasClass('open');
@@ -134,9 +132,9 @@ define([
                                     }
 
                                     var $check = $(this).parent().find('.check');
-                                    var shouldOpen = $check.data('checked')
-                                        ? false
-                                        : true;
+                                    var shouldOpen = $check.data('checked') ?
+                                        false :
+                                        true;
 
                                     $.each(
                                         $(this).parent().find('.subsystem-checkbox'),
@@ -175,7 +173,7 @@ define([
                                     $pmi.displaySubsystems(selected_subsystems);
 
                                 })
-                                )
+                            )
                             .append(
                                 $.jqElem('button')
                                 .attr('type', 'button')
@@ -224,13 +222,12 @@ define([
                                     $pmi.displaySubsystems(selected_subsystems);
 
                                 })
-                                )
+                            )
                             .append(
                                 $.jqElem('ul')
                                 .addClass('dropdown-menu')
-                                .css({width: '450px', 'padding-left': '5px', 'text-align': 'left'})
-                                )
-                            ;
+                                .css({ width: '450px', 'padding-left': '5px', 'text-align': 'left' })
+                            );
 
 
                         this.data('formElem').append($groupButton);
@@ -249,46 +246,46 @@ define([
                                 .addClass('subsystem-checkbox')
                                 .on('change', function (e) {
                                     return;
-                                    var $check = $(this).closest('.btn-group').find('.check');
-                                    if (this.checked) {
-                                        $check.data('checked', ($check.data('checked') || 0) + 1);
-                                        if ($check.data('checked') === $(this).closest('.btn-group').find('.subsystem-checkbox').length) {
-                                            $check.addClass('fa-check-square-o');
-                                            $check.removeClass('fa-check');
-                                        } else {
-                                            $check.removeClass('fa-check-square-o');
-                                            $check.addClass('fa-check');
-                                        }
-                                        $check.show();
-                                    } else {
-                                        $check.data('checked', $check.data('checked') - 1);
-                                        $check.removeClass('fa-check-square-o');
-                                        $check.addClass('fa-check');
-                                        if ($check.data('checked') === 0) {
-                                            $check.hide();
-                                        }
-                                    }
+                                    // var $check = $(this).closest('.btn-group').find('.check');
+                                    // if (this.checked) {
+                                    //     $check.data('checked', ($check.data('checked') || 0) + 1);
+                                    //     if ($check.data('checked') === $(this).closest('.btn-group').find('.subsystem-checkbox').length) {
+                                    //         $check.addClass('fa-check-square-o');
+                                    //         $check.removeClass('fa-check');
+                                    //     } else {
+                                    //         $check.removeClass('fa-check-square-o');
+                                    //         $check.addClass('fa-check');
+                                    //     }
+                                    //     $check.show();
+                                    // } else {
+                                    //     $check.data('checked', $check.data('checked') - 1);
+                                    //     $check.removeClass('fa-check-square-o');
+                                    //     $check.addClass('fa-check');
+                                    //     if ($check.data('checked') === 0) {
+                                    //         $check.hide();
+                                    //     }
+                                    // }
 
-                                    var selected_subsystems = [];
-                                    $.each(
-                                        $pmi.$elem.find('.subsystem-checkbox'),
-                                        function (i, c) {
-                                            if (c.checked) {
-                                                selected_subsystems.push($(c).val());
-                                            }
-                                        }
-                                    );
+                                    // var selected_subsystems = [];
+                                    // $.each(
+                                    //     $pmi.$elem.find('.subsystem-checkbox'),
+                                    //     function (i, c) {
+                                    //         if (c.checked) {
+                                    //             selected_subsystems.push($(c).val());
+                                    //         }
+                                    //     }
+                                    // );
 
-                                    $pmi.displaySubsystems(selected_subsystems);
+                                    //$pmi.displaySubsystems(selected_subsystems);
                                 })
-                                )
+                            )
                             .append(
                                 $.jqElem('span')
                                 .css('color', colorScale(f))
                                 .append('&nbsp;&nbsp;' + sub_name)
-                                )
                             )
-                        );
+                        )
+                    );
 
                 }
 
@@ -362,10 +359,10 @@ define([
 
                                         var tooltip = rxn_dict.tooltip;
 
-                                        tooltip = tooltip.replace(/\n/g, "<br>");
+                                        tooltip = tooltip.replace(/\n/g, '<br>');
                                         //tooltip = tooltip.replace(/:(.+?)<br>/g, ": <i>$1</i><br>");
-                                        tooltip = tooltip.replace(/^(.+?):/g, "<b>$1:</b>");
-                                        tooltip = tooltip.replace(/<br>(.+?):/g, "<br><b>$1:</b>");
+                                        tooltip = tooltip.replace(/^(.+?):/g, '<b>$1:</b>');
+                                        tooltip = tooltip.replace(/<br>(.+?):/g, '<br><b>$1:</b>');
                                         //tooltip = tooltip.replace(/Equation:(.+?)<br>/, "<div style = 'text-align : right'>$1</div>");
                                         my_fluxes[model_rxn].tooltip = tooltip;
                                         //'<span style = "white-space : nowrap">' + tooltip + '</span>';
@@ -378,7 +375,7 @@ define([
                 }
             );
 
-            var dataset = {subsystems: {}};
+            var dataset = { subsystems: {} };
 
             $.each(
                 subsystem_fluxes,
@@ -396,14 +393,12 @@ define([
                                 dataset.subsystems[subsystem] = [];
                             }
 
-                            dataset.subsystems[subsystem].push(
-                                {
-                                    bar: k,
-                                    value: v.flux,
-                                    tooltip: v.tooltip,
-                                    id: k
-                                }
-                            );
+                            dataset.subsystems[subsystem].push({
+                                bar: k,
+                                value: v.flux,
+                                tooltip: v.tooltip,
+                                id: k
+                            });
 
                         }
                     );
@@ -436,9 +431,9 @@ define([
             };
 
             Promise.all([
-                workspaceClient.get_objects([subanno_params]),
-                workspaceClient.get_objects([fbaobj_params])
-            ])
+                    workspaceClient.get_objects([subanno_params]),
+                    workspaceClient.get_objects([fbaobj_params])
+                ])
                 .spread(function (d1, d2) {
                     var interval = setInterval(function () {
                         if ($pmi.data('loader').is(':visible')) {
@@ -452,7 +447,7 @@ define([
                     $pmi.$elem.empty();
                     $pmi.$elem
                         .addClass('alert alert-danger')
-                        .html("Could not load object : " + d.error.message);
+                        .html('Could not load object : ' + d.error.message);
                 });
 
             this.appendUI(this.$elem);
@@ -511,7 +506,7 @@ define([
                 subsystems,
                 function (i, subsystem) {
 
-                    var $check = $pmi.$elem.find("[value='" + subsystem + "']");
+                    var $check = $pmi.$elem.find('[value=\'' + subsystem + '\']');
                     $check.prop('checked', true);
                     $check.closest('.btn-group').find('.check').show();
                     $check.closest('.btn-group').find('.check').data('checked', subsystems.length);
@@ -556,13 +551,11 @@ define([
             $.each(
                 sortedLegendKeys,
                 function (i, key) {
-                    sortedLegend.push(
-                        {
-                            label: key,
-                            color: legend[key],
-                            shape: 'square'
-                        }
-                    );
+                    sortedLegend.push({
+                        label: key,
+                        color: legend[key],
+                        shape: 'square'
+                    });
                 }
             );
 
@@ -578,7 +571,7 @@ define([
                     $.jqElem('div')
                     .css('display', 'none')
                     .attr('id', 'old-formElem')
-                    .append($.jqElem('span').append("Select subsystem(s):&nbsp;&nbsp;").css('float', 'left'))
+                    .append($.jqElem('span').append('Select subsystem(s):&nbsp;&nbsp;').css('float', 'left'))
                     .append(
                         $.jqElem('form')
                         .append(
@@ -592,21 +585,21 @@ define([
 
 
                             })
-                            )
                         )
                     )
+                )
                 .append(
                     $.jqElem('div')
                     .attr('id', 'barchartElem')
                     .css('display', 'none')
                     .css('width', 1100) //$elem.width())
                     .css('height', 500) //$elem.height() - 30)
-                    )
+                )
                 .append(
                     $.jqElem('div')
                     .attr('id', 'formElem')
-                    .css({width: '100%', 'text-align': 'center'})
-                    )
+                    .css({ width: '100%', 'text-align': 'center' })
+                )
                 .append(
                     $.jqElem('div')
                     .attr('id', 'loader')
@@ -616,15 +609,13 @@ define([
                         $.jqElem('div')
                         .attr('align', 'center')
                         .append($.jqElem('i').addClass('fa fa-spinner').addClass('fa fa-spin fa fa-4x'))
-                        )
                     )
-                ;
+                );
 
             this._rewireIds($container, this);
 
             this.data('barchart',
-                this.data('barchartElem').kbaseBarchart(
-                {
+                this.data('barchartElem').kbaseBarchart({
                     scaleAxes: true,
                     yLabelRegion: 'xPadding',
                     xGutter: 300,
@@ -634,9 +625,8 @@ define([
                     hGrid: true,
                     useUniqueID: true,
                     legendRegion: 'xGutter'
-                }
-            )
-                );
+                })
+            );
 
             var $barchart = this.data('barchart');
             $barchart.superYDomain = $barchart.defaultYDomain;
@@ -657,11 +647,9 @@ define([
                     .selectAll('.xAxis .tick text')
                     .data(this.dataset())
                     .on('mouseover', function (L, i) {
-                        $barchart.showToolTip(
-                            {
-                                label: $barchart.dataset()[i].tooltip[0]
-                            }
-                        );
+                        $barchart.showToolTip({
+                            label: $barchart.dataset()[i].tooltip[0]
+                        });
                     })
                     .on('mouseout', function (d) {
                         $barchart.hideToolTip();

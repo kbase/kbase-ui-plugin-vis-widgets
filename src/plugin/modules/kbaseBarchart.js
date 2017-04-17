@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
@@ -8,9 +6,9 @@ define([
     'use strict';
 
     $.KBWidget({
-        name: "kbaseBarchart",
-        parent: "kbaseVisWidget",
-        version: "1.0.0",
+        name: 'kbaseBarchart',
+        parent: 'kbaseVisWidget',
+        version: '1.0.0',
         options: {
             xScaleType: 'ordinal',
             overColor: 'yellow',
@@ -19,8 +17,7 @@ define([
             zeroLineColor: 'black',
             zeroLineWidth: 1
         },
-        _accessors: [
-        ],
+        _accessors: [],
         defaultXDomain: function defaultXDomain() {
 
             if (this.dataset() === undefined) {
@@ -39,19 +36,19 @@ define([
 
             var min = 0.9 * d3.min(
                 this.dataset().map(
-                function (d) {
-                    if ($.isArray(d.value)) {
-                        if (d.stacked) {
-                            return d3.sum(d.value);
+                    function (d) {
+                        if ($.isArray(d.value)) {
+                            if (d.stacked) {
+                                return d3.sum(d.value);
+                            } else {
+                                return d3.min(d.value);
+                            }
                         } else {
-                            return d3.min(d.value);
+                            return d.value;
                         }
-                    } else {
-                        return d.value;
                     }
-                }
-            )
-                );
+                )
+            );
 
             if (min > 0) {
                 min = 0;
@@ -61,19 +58,19 @@ define([
                 min,
                 1.1 * d3.max(
                     this.dataset().map(
-                    function (d) {
-                        if ($.isArray(d.value)) {
-                            if (d.stacked) {
-                                return d3.sum(d.value);
+                        function (d) {
+                            if ($.isArray(d.value)) {
+                                if (d.stacked) {
+                                    return d3.sum(d.value);
+                                } else {
+                                    return d3.max(d.value);
+                                }
                             } else {
-                                return d3.max(d.value);
+                                return d.value;
                             }
-                        } else {
-                            return d.value;
                         }
-                    }
-                )
                     )
+                )
             ];
         },
         extractLegend: function extractLegend(dataset) {
@@ -82,12 +79,10 @@ define([
             dataset.forEach(
                 function (bar, idx) {
                     if (!$.isArray(bar.color)) {
-                        legend.push(
-                            {
-                                color: bar.color,
-                                label: bar.bar
-                            }
-                        );
+                        legend.push({
+                            color: bar.color,
+                            label: bar.bar
+                        });
                     }
                 }
             );
@@ -103,17 +98,17 @@ define([
             var bounds = this.chartBounds();
             var $bar = this;
 
-            var transitionTime = this.initialized
-                ? this.options.transitionTime
-                : 0;
+            var transitionTime = this.initialized ?
+                this.options.transitionTime :
+                0;
 
             var funkyTown = function (barScale, d, i, init) {
 
                 if (init) {
                     this
-                        //.attr('width', 0)
-                        //.attr('height', 0)
-                        //.attr('x', bounds.origin.x + bounds.size.width)
+                    //.attr('width', 0)
+                    //.attr('height', 0)
+                    //.attr('x', bounds.origin.x + bounds.size.width)
                         .attr('x', function (b, j) {
                             var xId = d.bar;
                             if ($bar.options.useIDMapping) {
@@ -155,16 +150,16 @@ define([
                 this
                     .attr('width', barScale.rangeBand())
                     .attr('fill', function (b, j) {
-                        return d.color[ j % d.color.length ];
+                        return d.color[j % d.color.length];
                     })
                     .attr('stroke', function (b, j) {
-                        return d.stroke ? d.stroke[ j % d.stroke.length ] : 'none';
+                        return d.stroke ? d.stroke[j % d.stroke.length] : 'none';
                     })
                     .attr('stroke-width', function (b, j) {
                         return d.strokeWidth || $bar.options.strokeWidth;
                     })
                     .attr('data-fill', function (b, j) {
-                        return d.color[ j % d.color.length ];
+                        return d.color[j % d.color.length];
                     });
 
                 return this;
@@ -174,64 +169,62 @@ define([
 
                 this.on('mouseover', function (b, j) {
 
-                    var xId = d.bar;
-                    if ($bar.options.useIDMapping) {
-                        xId = $bar.xIDMap()[xId];
-                    }
+                        var xId = d.bar;
+                        if ($bar.options.useIDMapping) {
+                            xId = $bar.xIDMap()[xId];
+                        }
 
-                    if ($bar.options.overColor) {
-                        d3.select(this)
-                            .attr('stroke', $bar.options.overColor)
-                            .attr('stroke-width', 3);
+                        if ($bar.options.overColor) {
+                            d3.select(this)
+                                .attr('stroke', $bar.options.overColor)
+                                .attr('stroke-width', 3);
 
-                        $bar.data('D3svg').select('.yPadding').selectAll('g g text')
-                            .attr("fill",
-                                function (r, ri) {
-                                    if (r === xId) {
-                                        this.oldFill = d3.select(this).attr('fill');
-                                        this.hasOldFill = true;
-                                        return $bar.options.overColor;
-                                    } else {
-                                        return d3.select(this).attr('fill');
+                            $bar.data('D3svg').select('.yPadding').selectAll('g g text')
+                                .attr('fill',
+                                    function (r, ri) {
+                                        if (r === xId) {
+                                            this.oldFill = d3.select(this).attr('fill');
+                                            this.hasOldFill = true;
+                                            return $bar.options.overColor;
+                                        } else {
+                                            return d3.select(this).attr('fill');
+                                        }
                                     }
-                                }
-                            );
+                                );
 
-                        var xIdLabel = xId;
-                        if (d.value.length > 1) {
-                            xIdLabel += '[' + (j + 1) + ']';
-                        }
+                            var xIdLabel = xId;
+                            if (d.value.length > 1) {
+                                xIdLabel += '[' + (j + 1) + ']';
+                            }
 
-                        var label = d.label !== undefined
-                            ? d.label[j % d.label.length]
-                            : xIdLabel + ' is ' + d.value[j % d.value.length];//'pop up information!';
+                            var label = d.label !== undefined ?
+                                d.label[j % d.label.length] :
+                                xIdLabel + ' is ' + d.value[j % d.value.length]; //'pop up information!';
 
-                        var tooltip = d.tooltip
-                            ? d.tooltip[j % d.tooltip.length]
-                            : label;
+                            var tooltip = d.tooltip ?
+                                d.tooltip[j % d.tooltip.length] :
+                                label;
 
-                        if (label !== undefined) {
-                            $bar.showToolTip(
-                                {
+                            if (label !== undefined) {
+                                $bar.showToolTip({
                                     label: tooltip
-                                }
-                            );
+                                });
+                            }
                         }
-                    }
-                })
+                    })
                     .on('mouseout', function (b, j) {
                         if ($bar.options.overColor) {
                             d3.select(this)
                                 .transition()
                                 .attr('stroke', function (c) {
-                                    return d.stroke ? d.stroke[ j % d.stroke.length ] : 'none';
+                                    return d.stroke ? d.stroke[j % d.stroke.length] : 'none';
                                 })
                                 .attr('stroke-width', function (c) {
                                     return d.strokeWidth || $bar.options.strokeWidth;
                                 });
 
                             $bar.data('D3svg').select('.yPadding').selectAll('g g text')
-                                .attr("fill",
+                                .attr('fill',
                                     function (r, ri) {
                                         if (this.hasOldFill) {
                                             this.hasOldFill = false;
@@ -288,14 +281,12 @@ define([
                     var barScale = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([0,$bar.xScale().rangeBand()])
-                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05)
-                        ;
+                        .rangeBands([0, $bar.xScale().rangeBand()], 0.05);
 
                     var barScale2 = d3.scale.ordinal()
                         .domain(barDomain)
                         //.range([85])
-                        .rangeBands([0, 85], 0.05)
-                        ;
+                        .rangeBands([0, 85], 0.05);
 
                     d3.select(this).selectAll('.barcharBar')
                         .data(d.value)
@@ -344,7 +335,7 @@ define([
                     gyAxis = this.D3svg().select(this.region('chart'))
                         .append('g')
                         .attr('class', 'yAxis axis')
-                        .attr("transform", "translate(" + 0 + ",0)");
+                        .attr('transform', 'translate(' + 0 + ',0)');
                 }
 
                 gyAxis.transition().call(yAxis);
@@ -358,13 +349,11 @@ define([
                 .enter()
                 .append('g')
                 .attr('class', 'barGroup')
-                .call(groupAction)
-                ;
+                .call(groupAction);
 
             chart
                 .data(this.dataset(), $bar.uniqueness())
-                .call(groupAction)
-                ;
+                .call(groupAction);
 
             chart
                 .data(this.dataset(), $bar.uniqueness())

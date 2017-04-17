@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
@@ -13,9 +11,9 @@ define([
     'use strict';
 
     $.KBWidget({
-        name: "kbaseChordchart",
-        parent: "kbasePiechart",
-        version: "1.0.0",
+        name: 'kbaseChordchart',
+        parent: 'kbasePiechart',
+        version: '1.0.0',
         options: {
             chordPadding: 0.10,
             xOffset: 0,
@@ -49,13 +47,13 @@ define([
 
                 if (idx < this.lastChordData.length - 1) {
                     return {
-                        source: {startAngle: this.lastChordData[idx + 1].source.startAngle, endAngle: this.lastChordData[idx + 1].source.startAngle},
-                        target: {startAngle: this.lastChordData[idx + 1].target.startAngle, endAngle: this.lastChordData[idx + 1].target.startAngle}
+                        source: { startAngle: this.lastChordData[idx + 1].source.startAngle, endAngle: this.lastChordData[idx + 1].source.startAngle },
+                        target: { startAngle: this.lastChordData[idx + 1].target.startAngle, endAngle: this.lastChordData[idx + 1].target.startAngle }
                     };
                 } else {
                     return {
-                        source: {startAngle: this.options.endAngle, endAngle: this.options.endAngle},
-                        target: {startAngle: this.options.endAngle, endAngle: this.options.endAngle}
+                        source: { startAngle: this.options.endAngle, endAngle: this.options.endAngle },
+                        target: { startAngle: this.options.endAngle, endAngle: this.options.endAngle }
                     };
                 }
             }
@@ -63,18 +61,18 @@ define([
             //the first line animates the wedges in place, the second animates from the top, the third draws them rendered
             else if (this.options.startingPosition === 'slice') {
                 return {
-                    source: {startAngle: d.source.startAngle, endAngle: d.source.startAngle},
-                    target: {startAngle: d.target.startAngle, endAngle: d.target.startAngle}
+                    source: { startAngle: d.source.startAngle, endAngle: d.source.startAngle },
+                    target: { startAngle: d.target.startAngle, endAngle: d.target.startAngle }
                 };
             } else if (this.options.startingPosition === 'top') {
                 return {
-                    source: {startAngle: this.options.startAngle, endAngle: this.options.startAngle},
-                    target: {startAngle: this.options.startAngle, endAngle: this.options.startAngle}
+                    source: { startAngle: this.options.startAngle, endAngle: this.options.startAngle },
+                    target: { startAngle: this.options.startAngle, endAngle: this.options.startAngle }
                 };
             } else if (this.options.startingPosition === 'final') {
                 return {
-                    source: {startAngle: d.source.startAngle, endAngle: d.source.endAngle},
-                    target: {startAngle: d.target.startAngle, endAngle: d.target.endAngle}
+                    source: { startAngle: d.source.startAngle, endAngle: d.source.endAngle },
+                    target: { startAngle: d.target.startAngle, endAngle: d.target.endAngle }
                 };
             }
 
@@ -159,15 +157,13 @@ define([
                                 var newData = $.extend(true, {}, val.data);
                                 newData.color = rowColorScale(idx2);
 
-                                newChordGroups.push(
-                                    {
-                                        startAngle: startAngle,
-                                        endAngle: endAngle,
-                                        index: val.index,
-                                        value: val.value,
-                                        data: newData
-                                    }
-                                );
+                                newChordGroups.push({
+                                    startAngle: startAngle,
+                                    endAngle: endAngle,
+                                    index: val.index,
+                                    value: val.value,
+                                    data: newData
+                                });
                                 startAngle = endAngle;
                             }
                         );
@@ -197,7 +193,7 @@ define([
 
             var fillScale = d3.scale.ordinal()
                 .domain(d3.range(4))
-                .range(["#000000", "#FFDD89", "#957244", "#F26223"]);
+                .range(['#000000', '#FFDD89', '#957244', '#F26223']);
 
             if (this.options.drawChords) {
 
@@ -205,12 +201,12 @@ define([
                 chordG.enter().insert('g', '.labelG')
                     .attr('class', 'chords')
                     .attr('transform',
-                        'translate('
-                        + (bounds.size.width / 2 + this.options.xOffset)
-                        + ','
-                        + (bounds.size.height / 2 + this.options.yOffset)
-                        + ')'
-                        );
+                        'translate(' +
+                        (bounds.size.width / 2 + this.options.xOffset) +
+                        ',' +
+                        (bounds.size.height / 2 + this.options.yOffset) +
+                        ')'
+                    );
 
                 var innerRadius = this.innerRadius();
                 var outerRadius = this.outerRadius();
@@ -250,20 +246,20 @@ define([
                 var funkyTown = function () {
                     this
                         .attr('fill-opacity', .67)
-                        .attr("fill", function (d, idx) {
+                        .attr('fill', function (d, idx) {
                             return d.data.color || $chord.options.colorScale(d.data.colorIdx, d.data, $chord);
                         })
                         .attr('stroke', 'black')
                         .attr('stroke-width', .5)
                         //                    .attr("d", d3.svg.chord().radius(innerRadius))
-                        .attr("fill-opacity", .5)
+                        .attr('fill-opacity', .5)
                         //.on("mouseover", fade(.1))
                         //.on("mouseout", fade(1))
-                        ;
+                    ;
 
                     if (this.attrTween) {
                         this
-                            .attrTween("d", function (d, idx) {
+                            .attrTween('d', function (d, idx) {
 
                                 if (this._current === undefined) {
                                     this._current = $chord.startingChordPosition(d, idx);
@@ -282,30 +278,28 @@ define([
                     return this;
                 };
 
-                var transitionTime = this.initialized || this.options.startingPosition !== 'final'
-                    ? this.options.transitionTime
-                    : 0;
+                var transitionTime = this.initialized || this.options.startingPosition !== 'final' ?
+                    this.options.transitionTime :
+                    0;
 
                 var chords = chordG
                     //.append("g")
                     //  .attr("class", "chord")
-                    .selectAll("path")
+                    .selectAll('path')
                     .data(newChords);
                 chords
                     .enter()
-                    .append("path")
-                    .attr("fill", function (d) {
+                    .append('path')
+                    .attr('fill', function (d) {
                         return fillScale(d.target.index);
-                    })
-                    ;
+                    });
 
                 chords
                     .transition().duration(transitionTime)
                     .call(funkyTown)
                     .call($chord.endall, function () {
                         $chord.lastChordData = chordLayout.chords;
-                    });
-                ;
+                    });;
 
                 chords
                     .exit()
@@ -320,23 +314,21 @@ define([
                 .attr('class', 'ticks');
             tickG
                 .attr('transform',
-                    'translate('
-                    + (bounds.size.width / 2 + this.options.xOffset)
-                    + ','
-                    + (bounds.size.height / 2 + this.options.yOffset)
-                    + ')'
-                    );
+                    'translate(' +
+                    (bounds.size.width / 2 + this.options.xOffset) +
+                    ',' +
+                    (bounds.size.height / 2 + this.options.yOffset) +
+                    ')'
+                );
 
             var tickArcs = tickG
                 .selectAll('.tickArcs')
-                .data(chordLayout.groups)
-                ;
+                .data(chordLayout.groups);
 
             tickArcs
                 .enter()
                 .append('g')
-                .attr('class', 'tickArcs')
-                ;
+                .attr('class', 'tickArcs');
 
             tickArcs.exit().transition().duration(transitionTime).attr('opacity', 0)
                 .each('end', function (d) {
@@ -374,30 +366,30 @@ define([
                     this._current = interpolate(0);
                     return function (t) {
                         var d2 = interpolate(t);
-                        return "rotate(" + (d2.angle * 180 / Math.PI - 90) + ")"
-                            + "translate(" + outerRadius + ",0)";
+                        return 'rotate(' + (d2.angle * 180 / Math.PI - 90) + ')' +
+                            'translate(' + outerRadius + ',0)';
                     };
                 });
 
             tickGs.select('line')
-                .attr("x1", 1)
-                .attr("y1", 0)
-                .attr("x2", 5)
-                .attr("y2", 0)
-                .style("stroke", "#000")
+                .attr('x1', 1)
+                .attr('y1', 0)
+                .attr('x2', 5)
+                .attr('y2', 0)
+                .style('stroke', '#000')
                 .attr('stroke-opacity', function (d) {
                     return d3.select(this).attr('stroke-opacity') || 0;
                 });
             tickGs.select('line').transition().duration(transitionTime).attr('stroke-opacity', 1);
 
             tickGs.select('text')
-                .attr("x", 8)
-                .attr("dy", ".35em")
-                .attr("transform", function (d) {
-                    return (d.angle % (2 * Math.PI)) > Math.PI ? "rotate(180)translate(-16)" : null;
+                .attr('x', 8)
+                .attr('dy', '.35em')
+                .attr('transform', function (d) {
+                    return (d.angle % (2 * Math.PI)) > Math.PI ? 'rotate(180)translate(-16)' : null;
                 })
-                .style("text-anchor", function (d) {
-                    return (d.angle % (2 * Math.PI)) > Math.PI ? "end" : null;
+                .style('text-anchor', function (d) {
+                    return (d.angle % (2 * Math.PI)) > Math.PI ? 'end' : null;
                 })
                 .text(function (d) {
                     return d.label;
@@ -414,19 +406,19 @@ define([
                 return d3.range(0, d.value, 1000).map(function (v, i) {
                     return {
                         angle: v * k + d.startAngle,
-                        label: i % 5 ? null : v / 1000 + "k"
+                        label: i % 5 ? null : v / 1000 + 'k'
                     };
                 });
             }
 
             function fade(opacity) {
                 return function (g, i) {
-                    $chord.selectAll(".chord path")
+                    $chord.selectAll('.chord path')
                         .filter(function (d) {
                             return d.source.index !== i && d.target.index !== i;
                         })
                         .transition()
-                        .style("opacity", opacity);
+                        .style('opacity', opacity);
                 };
             }
 
@@ -434,6 +426,4 @@ define([
         renderXAxis: function () {},
         renderYAxis: function () {},
     });
-
-
 });

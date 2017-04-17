@@ -1,26 +1,26 @@
 {
-  "name": "kbase-ui-plugin-vis-widgets",
-  "description": "Visualization widgets - charts, plots",
-  "keywords": [
-      "kbase", "widget"
-  ],
-  "author": [
-      "kbase"
-  ],
-  "moduleType": "kbase-ui-plugin",
-  "main": "src/plugin/config.yml",
-  "ignore": [
-    ".gitignore"
-  ],  
-  "dependencies": {
-      "jquery": "^2.1.0",
-      "d3": "^3.5.0",
-      "kbase-ui-widget": "^1.0.0"
-  },
-  "devDependencies": {},
-  "repository": {
-      "type": "git",
-      "url": "git://github.com/kbase/kbase-ui-plugin-vis-widgets"
-  },
-  "license": "SEE LICENSE IN LICENSE.md"
+    "name": "kbase-ui-plugin-vis-widgets",
+    "description": "Visualization widgets - charts, plots",
+    "keywords": [
+        "kbase", "widget"
+    ],
+    "author": [
+        "kbase"
+    ],
+    "moduleType": "kbase-ui-plugin",
+    "main": "src/plugin/config.yml",
+    "ignore": [
+        ".gitignore"
+    ],
+    "dependencies": {
+        "jquery": "^2.1.0",
+        "d3": "^3.5.0",
+        "kbase-ui-widget": "^1.0.0"
+    },
+    "devDependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/kbase/kbase-ui-plugin-vis-widgets"
+    },
+    "license": "SEE LICENSE IN LICENSE.md"
 }

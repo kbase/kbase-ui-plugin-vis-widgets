@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint white: true, browser: true*/
 define([
     'jquery',
     'd3',
@@ -8,9 +6,9 @@ define([
     'use strict';
 
     $.KBWidget({
-        name: "kbaseVenndiagram",
-        parent: "kbaseVisWidget",
-        version: "1.0.0",
+        name: 'kbaseVenndiagram',
+        parent: 'kbaseVisWidget',
+        version: '1.0.0',
         options: {
             xGutter: 0,
             xPadding: 0,
@@ -30,7 +28,7 @@ define([
                 if ($venn.fillScale === undefined) {
                     $venn.fillScale = d3.scale.category20();
                 }
-                
+
                 if ($venn.circleColors === undefined) {
                     $venn.circleColors = [];
                 }
@@ -84,8 +82,7 @@ define([
             tooltips: true,
             radiusScale: 1.00
         },
-        _accessors: [
-        ],
+        _accessors: [],
         init: function (options) {
             this._super(options);
 
@@ -148,9 +145,7 @@ define([
             var mag1 = Math.sqrt(Math.pow(i1.x, 2) + Math.pow(i1.y, 2));
             var mag2 = Math.sqrt(Math.pow(i2.x, 2) + Math.pow(i2.y, 2));
 
-            var ret = mag1 > mag2
-                ? [i1, i2, midPoint]
-                : [i2, i1, midPoint];
+            var ret = mag1 > mag2 ? [i1, i2, midPoint] : [i2, i1, midPoint];
 
             return ret;
         },
@@ -170,14 +165,14 @@ define([
             venn.enter().append('g')
                 .attr('class', 'venn')
                 .attr('transform',
-                    'translate('
-                    + (bounds.size.width / 2 + this.options.xOffset)
-                    + ','
-                    + (bounds.size.height / 2 + this.options.yOffset)
-                    + ')'
-                    );
+                    'translate(' +
+                    (bounds.size.width / 2 + this.options.xOffset) +
+                    ',' +
+                    (bounds.size.height / 2 + this.options.yOffset) +
+                    ')'
+                );
 
-            radius = radius * 0.5;   //basically just guessing at a magic number that looks reasonably good
+            radius = radius * 0.5; //basically just guessing at a magic number that looks reasonably good
 
             radius = this.options.radius || radius;
             var overlap = this.options.overlap;
@@ -186,8 +181,7 @@ define([
 
             var numCircles = 3;
 
-            var circleData = [
-                {
+            var circleData = [{
                     id: 0,
                     angle: $venn.options.startAngle,
                     r: radius,
@@ -211,7 +205,7 @@ define([
             var intersects2 = this.intersectCircles(circleData[1], circleData[2]);
             var intersects3 = this.intersectCircles(circleData[0], circleData[2]);
 
-            var labelData = [//];/*
+            var labelData = [ //];/*
                 {
                     angle: circleData[0].angle,
                     label: dataset.c1.label,
@@ -293,9 +287,9 @@ define([
                 }
             ];
 
-            var transitionTime = this.initialized
-                ? this.options.transitionTime
-                : 0;
+            var transitionTime = this.initialized ?
+                this.options.transitionTime :
+                0;
 
             var circleAction = function () {
                 this
@@ -306,15 +300,13 @@ define([
                             var tooltip = $venn.tooltip(d);
 
                             if (tooltip) {
-                                $venn.showToolTip(
-                                    {
-                                        label: tooltip,
-                                        event: {
-                                            pageX: $venn.options.cornerToolTip ? $venn.$elem.prop('offsetLeft') + 5 : d3.event.pageX,
-                                            pageY: $venn.options.cornerToolTip ? $venn.$elem.prop('offsetTop') + 20 : d3.event.pageY
-                                        }
+                                $venn.showToolTip({
+                                    label: tooltip,
+                                    event: {
+                                        pageX: $venn.options.cornerToolTip ? $venn.$elem.prop('offsetLeft') + 5 : d3.event.pageX,
+                                        pageY: $venn.options.cornerToolTip ? $venn.$elem.prop('offsetTop') + 20 : d3.event.pageY
                                     }
-                                );
+                                });
                             }
                         }
                     })
@@ -333,7 +325,7 @@ define([
                         if (d.data.action) {
                             var func = d.data.action;
                             if (typeof func === 'string') {
-                                func = Function("d", func);
+                                func = Function('d', func);
                             }
                             func(d.data);
                         }
@@ -357,56 +349,78 @@ define([
              })
              ;*/
 
-            var arcs = [
-                {d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 1 0 ' + intersects[0].x + ' ' + intersects[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects2[1].x + ' ' + intersects2[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' Z',
-                    circle: 0, fillColor: '#F00', data: dataset.c1},
-                {d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 1 1 ' + intersects2[0].x + ' ' + intersects2[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' Z',
-                    circle: 1, fillColor: '#00F', data: dataset.c2},
-                {d: 'M ' + intersects2[0].x + ' ' + intersects2[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 1 1 ' + intersects[0].x + ' ' + intersects[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[0].x + ' ' + intersects2[0].y
-                        + ' Z',
-                    circle: 2, fillColor: '#0F0', data: dataset.c3},
-                {d: 'M ' + intersects[1].x + ' ' + intersects[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[1].x + ' ' + intersects2[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y
-                        + ' Z',
-                    circle: [0, 1, 2], data: dataset.c1c2c3},
-                {d: 'M ' + intersects[0].x + ' ' + intersects[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects2[1].x + ' ' + intersects2[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects[0].x + ' ' + intersects[0].y
-                        + ' Z',
-                    circle: [0, 2], data: dataset.c1c3},
-                {d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[1].x + ' ' + intersects2[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects[1].x + ' ' + intersects[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[0].x + ' ' + intersects3[0].y
-                        + ' Z',
-                    circle: [0, 1], data: dataset.c1c2},
-                {d: 'M ' + intersects2[0].x + ' ' + intersects2[0].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects3[1].x + ' ' + intersects3[1].y
-                        + ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[0].x + ' ' + intersects2[0].y
-                        + ' Z',
-                    circle: [1, 2], data: dataset.c2c3}
+            var arcs = [{
+                    d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 1 0 ' + intersects[0].x + ' ' + intersects[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects2[1].x + ' ' + intersects2[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' Z',
+                    circle: 0,
+                    fillColor: '#F00',
+                    data: dataset.c1
+                },
+                {
+                    d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 1 1 ' + intersects2[0].x + ' ' + intersects2[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' Z',
+                    circle: 1,
+                    fillColor: '#00F',
+                    data: dataset.c2
+                },
+                {
+                    d: 'M ' + intersects2[0].x + ' ' + intersects2[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 1 1 ' + intersects[0].x + ' ' + intersects[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[0].x + ' ' + intersects2[0].y +
+                        ' Z',
+                    circle: 2,
+                    fillColor: '#0F0',
+                    data: dataset.c3
+                },
+                {
+                    d: 'M ' + intersects[1].x + ' ' + intersects[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[1].x + ' ' + intersects2[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y +
+                        ' Z',
+                    circle: [0, 1, 2],
+                    data: dataset.c1c2c3
+                },
+                {
+                    d: 'M ' + intersects[0].x + ' ' + intersects[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects2[1].x + ' ' + intersects2[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[1].x + ' ' + intersects3[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects[0].x + ' ' + intersects[0].y +
+                        ' Z',
+                    circle: [0, 2],
+                    data: dataset.c1c3
+                },
+                {
+                    d: 'M ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[1].x + ' ' + intersects2[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects[1].x + ' ' + intersects[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects3[0].x + ' ' + intersects3[0].y +
+                        ' Z',
+                    circle: [0, 1],
+                    data: dataset.c1c2
+                },
+                {
+                    d: 'M ' + intersects2[0].x + ' ' + intersects2[0].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects[1].x + ' ' + intersects[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 1 ' + intersects3[1].x + ' ' + intersects3[1].y +
+                        ' A ' + radius + ' ' + radius + ' 0 0 0 ' + intersects2[0].x + ' ' + intersects2[0].y +
+                        ' Z',
+                    circle: [1, 2],
+                    data: dataset.c2c3
+                }
             ];
 
             var arcs = venn.selectAll('.arc').data(arcs);
             arcs.enter()
                 .append('path')
-                .attr('class', 'arc')
-                ;
+                .attr('class', 'arc');
             arcs
                 .call(circleAction)
                 .transition().duration(transitionTime)
@@ -436,7 +450,7 @@ define([
                 .attr('class', 'strokedCircle');
 
             strokedCircles
-                //.call(circleAction)
+            //.call(circleAction)
                 .transition().duration(transitionTime)
                 .attr('cx', function (d) {
                     return d.cx || Math.cos(d.angle) * d.originDistance;
@@ -464,7 +478,7 @@ define([
                 }
 
                 this
-                    .attr("text-anchor", "middle")
+                    .attr('text-anchor', 'middle')
                     .attr('dy', function (d) {
                         return d.dy || '0.5em';
                     })
@@ -475,7 +489,7 @@ define([
                         .text(function (d) {
                             return d.label || d.value;
                         })
-                        .attrTween("transform", function (d, idx) {
+                        .attrTween('transform', function (d, idx) {
                             //this._current=  this._current || d;
                             if (this._current === undefined) {
                                 this._current = d;
@@ -493,7 +507,7 @@ define([
                             return function (t) {
                                 var d2 = interpolate(t);
                                 var pos = [Math.cos(d2.angle) * d2.radius, -Math.sin(d2.angle) * d2.radius];
-                                return "translate(" + pos + ")";
+                                return 'translate(' + pos + ')';
                             };
 
                         })
