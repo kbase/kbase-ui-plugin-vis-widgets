@@ -1,17 +1,17 @@
-/*global define*/
-/*jslint white: true, browser: true*/
-
 define([
     'jquery',
     'd3',
     'kb_vis_visWidget'
-], function ($, d3) {
+], function (
+    $,
+    d3
+) {
     'use strict';
 
     $.KBWidget({
-        name: "kbasePiechart",
-        parent: "kbaseVisWidget",
-        version: "1.0.0",
+        name: 'kbasePiechart',
+        parent: 'kbaseVisWidget',
+        version: '1.0.0',
         options: {
             xGutter: 0,
             xPadding: 0,
@@ -41,8 +41,7 @@ define([
             rescaleChildren: true,
             outerRadiusInset: 10
         },
-        _accessors: [
-        ],
+        _accessors: [],
         init: function (options) {
             this._super(options);
 
@@ -89,19 +88,19 @@ define([
             if (this.initialized) {
 
                 if (idx < this.lastPieData.length - 1) {
-                    return {startAngle: this.lastPieData[idx + 1].startAngle, endAngle: this.lastPieData[idx + 1].startAngle};
+                    return { startAngle: this.lastPieData[idx + 1].startAngle, endAngle: this.lastPieData[idx + 1].startAngle };
                 } else {
-                    return {startAngle: this.options.endAngle, endAngle: this.options.endAngle};
+                    return { startAngle: this.options.endAngle, endAngle: this.options.endAngle };
                 }
             }
 
             //the first line animates the wedges in place, the second animates from the top, the third draws them rendered
             else if (this.options.startingPosition === 'slice') {
-                return {startAngle: d.startAngle, endAngle: d.startAngle};
+                return { startAngle: d.startAngle, endAngle: d.startAngle };
             } else if (this.options.startingPosition === 'top') {
-                return {startAngle: this.options.startAngle, endAngle: this.options.startAngle};
+                return { startAngle: this.options.startAngle, endAngle: this.options.startAngle };
             } else if (this.options.startingPosition === 'final') {
-                return {startAngle: d.startAngle, endAngle: d.endAngle};
+                return { startAngle: d.startAngle, endAngle: d.endAngle };
             }
 
         },
@@ -110,13 +109,13 @@ define([
             return ret;
         },
         midPosition: function (d) {
-            var m1 = (this.midAngle(d));//- this.options.startAngle);
+            var m1 = (this.midAngle(d)); //- this.options.startAngle);
             var midAngle = m1 % (2 * Math.PI);
 
             var ret =
-                (0 < midAngle && midAngle < Math.PI) || midAngle < -Math.PI
-                ? 1
-                : -1;
+                (0 < midAngle && midAngle < Math.PI) || midAngle < -Math.PI ?
+                1 :
+                -1;
             return ret;
         },
         useOutsideLabels: function (d) {
@@ -133,7 +132,7 @@ define([
                     function (idx, val) {
 
                         if (typeof val === 'number') {
-                            newDataset[idx] = {value: val};
+                            newDataset[idx] = { value: val };
                         }
                     }
                 );
@@ -147,9 +146,9 @@ define([
 
             var radius = this.options.outerRadius;
             if (radius <= 0) {
-                var diameter = bounds.size.width < bounds.size.height
-                    ? bounds.size.width
-                    : bounds.size.height;
+                var diameter = bounds.size.width < bounds.size.height ?
+                    bounds.size.width :
+                    bounds.size.height;
 
                 radius = diameter / 2 + radius;
 
@@ -185,52 +184,49 @@ define([
                     .outerRadius(radius + 10);
 
                 this.on('mouseover', function (d) {
+                        if (d.data.gap) {
+                            return;
+                        }
 
-                    if (d.data.gap) {
-                        return;
-                    }
+                        var slice = this;
 
-                    var slice = this;
+                        if ($pie.dragging) {
+                            return;
+                        }
 
-                    if ($pie.dragging) {
-                        return;
-                    }
+                        $pie.outerArc
+                            .transition()
+                            .duration(0)
+                            .attr('fill-opacity', $pie.options.outerArcOpacity)
+                            .attr('fill', function (d2, idx) {
+                                return d.data.color || $pie.options.colorScale(idx, d.data, $pie);
+                            })
+                            .attr('transform', function (d2) {
+                                return d3.select(slice).attr('transform');
+                            })
+                            .attr('d', function (d2) {
+                                return outerArcMaker({ startAngle: d.startAngle, endAngle: d.endAngle });
+                            });
 
-                    $pie.outerArc
-                        .transition()
-                        .duration(0)
-                        .attr('fill-opacity', $pie.options.outerArcOpacity)
-                        .attr('fill', function (d2, idx) {
-                            return d.data.color || $pie.options.colorScale(idx, d.data, $pie);
-                        })
-                        .attr('transform', function (d2) {
-                            return d3.select(slice).attr('transform');
-                        })
-                        .attr('d', function (d2) {
-                            return outerArcMaker({startAngle: d.startAngle, endAngle: d.endAngle});
-                        });
+                        var coordinates = [0, 0];
+                        coordinates = d3.mouse(this);
+                        var x = coordinates[0];
+                        var y = coordinates[1];
 
-                    var coordinates = [0, 0];
-                    coordinates = d3.mouse(this);
-                    var x = coordinates[0];
-                    var y = coordinates[1];
-
-                    if ($pie.options.tooltips) {
-                        var tooltip = $pie.tooltip(d);
-                        if (tooltip) {
-                            $pie.showToolTip(
-                                {
+                        if ($pie.options.tooltips) {
+                            var tooltip = $pie.tooltip(d);
+                            if (tooltip) {
+                                $pie.showToolTip({
                                     label: tooltip,
                                     event: {
                                         pageX: $pie.options.cornerToolTip ? $pie.$elem.prop('offsetLeft') + 5 : d3.event.pageX,
                                         pageY: $pie.options.cornerToolTip ? $pie.$elem.prop('offsetTop') + 20 : d3.event.pageY
                                     }
-                                }
-                            );
+                                });
+                            }
                         }
-                    }
 
-                })
+                    })
                     .on('mouseout', function (d) {
                         if (d.data.gap) {
                             return;
@@ -249,8 +245,7 @@ define([
                             $pie.options.startAngle = $pie.options.startAngle - d.startAngle;
                             $pie.renderChart();
                         }
-                    })
-                    ;
+                    });
                 return this;
             };
         },
@@ -373,77 +368,75 @@ define([
                 if (this.attrTween) {
                     if ($pie.options.gradient) {
                         this
-                            //*
+                        //*
                             .attrTween('fill',
-                                function (d, idx) {
-                                    var uniqueFunc = $pie.uniqueness();
+                            function (d, idx) {
+                                var uniqueFunc = $pie.uniqueness();
 
-                                    var currentID = uniqueFunc === undefined
-                                        ? undefined
-                                        : uniqueFunc(d);
+                                var currentID = uniqueFunc === undefined ?
+                                    undefined :
+                                    uniqueFunc(d);
 
-                                    var gradID = d.data.gradID;
-                                    if (gradID === undefined) {
+                                var gradID = d.data.gradID;
+                                if (gradID === undefined) {
 
-                                        var newGradID;
-                                        if ($pie.lastPieData !== undefined && idx < $pie.lastPieData.length) {
+                                    var newGradID;
+                                    if ($pie.lastPieData !== undefined && idx < $pie.lastPieData.length) {
 
 
-                                            //no id? we're using indexes. Easy.
-                                            if (currentID === undefined) {
-                                                newGradID = $pie.lastPieData[idx].data.gradID;
-                                            }
-                                            //id? Shit. Iterate and look up by the id
-                                            else {
-                                                $.each(
-                                                    $pie.lastPieData,
-                                                    function (idx, val) {
-                                                        var lastID = uniqueFunc(val);
-                                                        if (lastID === currentID) {
-                                                            newGradID = val.data.gradID;
-                                                            return;
-                                                        }
+                                        //no id? we're using indexes. Easy.
+                                        if (currentID === undefined) {
+                                            newGradID = $pie.lastPieData[idx].data.gradID;
+                                        }
+                                        //id? Shit. Iterate and look up by the id
+                                        else {
+                                            $.each(
+                                                $pie.lastPieData,
+                                                function (idx, val) {
+                                                    var lastID = uniqueFunc(val);
+                                                    if (lastID === currentID) {
+                                                        newGradID = val.data.gradID;
+                                                        return;
                                                     }
-                                                );
-                                            }
-
+                                                }
+                                            );
                                         }
 
-                                        if (newGradID === undefined) {
-                                            newGradID = $pie.uuid();
-                                        }
-
-                                        gradID = d.data.gradID = newGradID;
                                     }
 
-                                    var gradient = d.data.color;
-
-                                    if (d.data.color === undefined) {
-                                        d.data.color = $pie.options.colorScale(idx, d.data, $pie);
+                                    if (newGradID === undefined) {
+                                        newGradID = $pie.uuid();
                                     }
 
-                                    gradient = 'url(#'
-                                        + $pie.radialGradient(
-                                            {
-                                                startColor: d.data.color,
-                                                stopColor: $pie.options.gradient ? $pie.options.radialGradientStopColor : d.data.color,
-                                                id: gradID,
-                                                r: radius
-                                            }
-                                        ) + ')';
-
-                                    return function (t) {
-                                        return gradient;
-                                    };
+                                    gradID = d.data.gradID = newGradID;
                                 }
-                            );
+
+                                var gradient = d.data.color;
+
+                                if (d.data.color === undefined) {
+                                    d.data.color = $pie.options.colorScale(idx, d.data, $pie);
+                                }
+
+                                gradient = 'url(#' +
+                                    $pie.radialGradient({
+                                        startColor: d.data.color,
+                                        stopColor: $pie.options.gradient ? $pie.options.radialGradientStopColor : d.data.color,
+                                        id: gradID,
+                                        r: radius
+                                    }) + ')';
+
+                                return function (t) {
+                                    return gradient;
+                                };
+                            }
+                        );
                     }
                     this
-                        .attrTween("d", function (d, idx) {
+                        .attrTween('d', function (d, idx) {
 
                             //this._current = this._current || d;//{startAngle : this.options.startAngle, endAngle : this.options.startAngle};
                             //this._current = this._current || {startAngle : d.startAngle, endAngle : d.startAngle};
-//$pie.lastPieData = pieData;
+                            //$pie.lastPieData = pieData;
                             if (this._current === undefined) {
 
                                 this._current = $pie.startingPosition(d, idx);
@@ -472,7 +465,7 @@ define([
                 }
 
                 this
-                    .attr("text-anchor", "middle");
+                    .attr('text-anchor', 'middle');
 
                 if (this.attrTween) {
 
@@ -491,7 +484,7 @@ define([
                                 return $me._currentOpacity = interpolate(t);
                             };
                         })
-                        .attrTween("transform", function (d, idx) {
+                        .attrTween('transform', function (d, idx) {
                             //this._current=  this._current || d;
                             if (this._current === undefined) {
                                 this._current = $pie.startingPosition(d, idx);
@@ -499,12 +492,12 @@ define([
 
                             var endPoint = d;
                             if (opacity === 0) {
-                                endPoint = {startAngle: d.startAngle, endAngle: d.startAngle};
+                                endPoint = { startAngle: d.startAngle, endAngle: d.startAngle };
                                 if (idx > 0 && pieData.length) {
                                     if (idx > pieData.length) {
                                         idx = pieData.length;
                                     }
-                                    endPoint = {startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle};
+                                    endPoint = { startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle };
                                 }
                             }
 
@@ -514,9 +507,9 @@ define([
 
                             var useOutsideLabels = $pie.useOutsideLabels(d);
 
-                            var myArcMaker = useOutsideLabels
-                                ? textArcMaker
-                                : arcMaker;
+                            var myArcMaker = useOutsideLabels ?
+                                textArcMaker :
+                                arcMaker;
 
                             return function (t) {
                                 var d2 = interpolate(t);
@@ -525,11 +518,11 @@ define([
                                     pos[0] = radius * 1.06 * $pie.midPosition(d2);
                                     pos[1] += 2;
                                 }
-                                return "translate(" + pos + ")";
+                                return 'translate(' + pos + ')';
                             };
 
                         })
-                        .styleTween("text-anchor", function (d) {
+                        .styleTween('text-anchor', function (d) {
                             this._current = this._current || d;
                             var interpolate = d3.interpolate(this._current, d);
                             this._current = interpolate(0);
@@ -539,7 +532,7 @@ define([
                             return function (t) {
                                 var d2 = interpolate(t);
                                 if (useOutsideLabels) {
-                                    return $pie.midPosition(d2) > 0 ? "start" : "end";
+                                    return $pie.midPosition(d2) > 0 ? 'start' : 'end';
                                 } else {
                                     return 'middle';
                                 }
@@ -553,18 +546,18 @@ define([
             var drag = d3.behavior.drag();
 
             drag.on('dragstart', function (d) {
-                //d.__dragX = 0;
-                //d.__dragY = 0;
-                this.__delta = 0;
-                $pie.outerArc.attr('fill-opacity', 0);
-                $pie.dragging = true;
-            })
+                    //d.__dragX = 0;
+                    //d.__dragY = 0;
+                    this.__delta = 0;
+                    $pie.outerArc.attr('fill-opacity', 0);
+                    $pie.dragging = true;
+                })
                 .on('drag', function (d) {
 
                     //d.__dragX += d3.event.dx;
                     //d.__dragY += d3.event.dy;
 
-                    this.__delta += $pie.midPosition(d) * d3.event.dy;// + d3.event.dx;// - d3.event.dx;
+                    this.__delta += $pie.midPosition(d) * d3.event.dy; // + d3.event.dx;// - d3.event.dx;
 
                     var dragThrottle = 20;
 
@@ -575,7 +568,7 @@ define([
                         var proposedStartAngle = currentStartAngle + Math.PI * (distance / 2) / radius;
 
                         $pie.options.startAngle = proposedStartAngle;
-//XXX                        $pie.options.endAngle = $pie.options.startAngle + 2 * Math.PI;
+                        //XXX                        $pie.options.endAngle = $pie.options.startAngle + 2 * Math.PI;
                         $pie.renderChart();
                         this.__delta = 0;
 
@@ -586,8 +579,7 @@ define([
                     //delete d.__dragX;
                     delete this.__delta;
                     $pie.dragging = false;
-                })
-                ;
+                });
 
             //there is no mouse action on a pie chart for now.
 
@@ -599,12 +591,12 @@ define([
             pie.enter().append('g')
                 .attr('class', 'pie')
                 .attr('transform',
-                    'translate('
-                    + (bounds.size.width / 2 + this.options.xOffset)
-                    + ','
-                    + (bounds.size.height / 2 + this.options.yOffset)
-                    + ')'
-                    );
+                    'translate(' +
+                    (bounds.size.width / 2 + this.options.xOffset) +
+                    ',' +
+                    (bounds.size.height / 2 + this.options.yOffset) +
+                    ')'
+                );
             $.each(
                 pieData,
                 function (idx, val) {
@@ -627,16 +619,15 @@ define([
                 pieBG.enter().insert('path', '.pie')
                     .attr('class', 'pieBG')
                     .attr('transform',
-                        'translate('
-                        + (bounds.size.width / 2 + this.options.xOffset)
-                        + ','
-                        + (bounds.size.height / 2 + this.options.yOffset)
-                        + ')'
-                        )
+                        'translate(' +
+                        (bounds.size.width / 2 + this.options.xOffset) +
+                        ',' +
+                        (bounds.size.height / 2 + this.options.yOffset) +
+                        ')'
+                    )
                     .attr('d', function (d) {
-                        return pieMaker({startAngle: 0, endAngle: 2 * Math.PI});
-                    })
-                    ;
+                        return pieMaker({ startAngle: 0, endAngle: 2 * Math.PI });
+                    });
                 pieBG
                     .attr('fill', $pie.options.pieColor);
             }
@@ -646,8 +637,7 @@ define([
             $pie.outerArc
                 .enter()
                 .append('path')
-                .attr('class', 'outerArc')
-                ;
+                .attr('class', 'outerArc');
 
             var slices = pie.selectAll('.slice').data(pieData, this.uniqueness());
 
@@ -665,11 +655,11 @@ define([
                 .attr('stroke-width', $pie.options.strokeWidth)
                 .attr('stroke-linejoin', 'bevel')
                 //.call(funkyTown);
-                ;
+            ;
 
-            var transitionTime = this.initialized || this.options.startingPosition !== 'final'
-                ? this.options.transitionTime
-                : 0;
+            var transitionTime = this.initialized || this.options.startingPosition !== 'final' ?
+                this.options.transitionTime :
+                0;
 
             //transitionTime = this.options.transitionTime;
 
@@ -693,11 +683,11 @@ define([
                 //.remove();
                 .transition()
                 .duration(transitionTime)
-                .attrTween("d", function (d, idx) {
+                .attrTween('d', function (d, idx) {
 
-                    var endPoint = {startAngle: d.startAngle, endAngle: d.startAngle};
+                    var endPoint = { startAngle: d.startAngle, endAngle: d.startAngle };
                     if (idx > 0 && pieData.length && idx <= pieData.length) {
-                        endPoint = {startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle};
+                        endPoint = { startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle };
                     }
 
                     var interpolate = d3.interpolate(this._current, endPoint);
@@ -715,24 +705,24 @@ define([
             labelG.enter().append('g')
                 .attr('class', 'labelG')
                 .attr('transform',
-                    'translate('
-                    + (bounds.size.width / 2 + this.options.xOffset)
-                    + ','
-                    + (bounds.size.height / 2 + this.options.yOffset)
-                    + ')'
-                    );
+                    'translate(' +
+                    (bounds.size.width / 2 + this.options.xOffset) +
+                    ',' +
+                    (bounds.size.height / 2 + this.options.yOffset) +
+                    ')'
+                );
 
             var labels = labelG.selectAll('.label')
                 .data(
                     pieData.filter(function (d) {
                         return (
-                            ($pie.options.labels || d.data.forceLabel)
-                            && d.data.label !== undefined
-                            && d.data.label.length
-                            );
+                            ($pie.options.labels || d.data.forceLabel) &&
+                            d.data.label !== undefined &&
+                            d.data.label.length
+                        );
                     }),
                     this.uniqueness()
-                    );
+                );
 
             labels
                 .enter()
@@ -780,17 +770,17 @@ define([
                                 return $me._currentOpacity = interpolate(t);
                             };
                         })
-                        .attrTween("points", function (d, idx) {
+                        .attrTween('points', function (d, idx) {
                             this._current = this._current || $pie.startingPosition(d, idx);
 
                             var endPoint = d;
                             if (opacity === 0) {
-                                endPoint = {startAngle: d.startAngle, endAngle: d.startAngle};
+                                endPoint = { startAngle: d.startAngle, endAngle: d.startAngle };
                                 if (idx > 0 && pieData.length) {
                                     if (idx > pieData.length) {
                                         idx = pieData.length;
                                     }
-                                    endPoint = {startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle};
+                                    endPoint = { startAngle: pieData[idx - 1].endAngle, endAngle: pieData[idx - 1].endAngle };
                                 }
 
                             }
@@ -799,9 +789,9 @@ define([
 
                             var useOutsideLabels = $pie.useOutsideLabels(d);
 
-                            var myArcMaker = useOutsideLabels
-                                ? textArcMaker
-                                : arcMaker;
+                            var myArcMaker = useOutsideLabels ?
+                                textArcMaker :
+                                arcMaker;
 
                             this._current = interpolate(0);
                             return function (t) {
@@ -821,11 +811,11 @@ define([
                 .selectAll('polyline')
                 .data(pieData.filter(function (d) {
                     return (
-                        ($pie.options.labels || d.data.forceLabel)
-                        && ($pie.options.outsideLabels || d.data.outsideLabel)
-                        && d.data.label !== undefined
-                        && d.data.label.length
-                        );
+                        ($pie.options.labels || d.data.forceLabel) &&
+                        ($pie.options.outsideLabels || d.data.outsideLabel) &&
+                        d.data.label !== undefined &&
+                        d.data.label.length
+                    );
                 }), this.uniqueness());
 
             lines

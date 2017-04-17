@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint white: true, browser: true*/
 define([
     'jquery',
     'd3',
@@ -8,9 +6,9 @@ define([
     'use strict';
 
     $.KBWidget({
-        name: "kbaseTreechart",
-        parent: "kbaseVisWidget",
-        version: "1.0.0",
+        name: 'kbaseTreechart',
+        parent: 'kbaseVisWidget',
+        version: '1.0.0',
         options: {
             debug: false,
             xGutter: 0,
@@ -38,7 +36,7 @@ define([
             staticWidth: false,
             staticHeight: false,
             canShrinkWidth: true,
-            bias: "root"
+            bias: 'root'
         },
         _accessors: [
             'comparison'
@@ -126,8 +124,8 @@ define([
 
             d.fill = $tree.afterInArray(d.fill, colors);
 
-            if (d.fill !== 'black' && d.children !== undefined
-                && !$tree.findInChildren($tree.options.red, d) && !$tree.findInChildren($tree.options.blue, d)) {
+            if (d.fill !== 'black' && d.children !== undefined &&
+                !$tree.findInChildren($tree.options.red, d) && !$tree.findInChildren($tree.options.blue, d)) {
 
                 $tree.toggle(d);
                 $tree.updateTree(d);
@@ -182,8 +180,7 @@ define([
             var distance = this.options.distance;
             if (d.distance !== undefined) {
                 distance *= d.distance;
-            }
-            ;
+            };
 
             if (d.parent !== undefined) {
                 distance += this.depth(d.parent, rootOffset, chartOffset);
@@ -260,12 +257,12 @@ define([
 
             function findWidth(text, d) {
                 var box = text[0][0].getBBox();
-                var right = d.children || d._children
-                    ? d.y + $tree.options.labelSpace
-                    : d.y + box.width + $tree.options.labelSpace;
-                var left = d.children || d._children
-                    ? d.y + $tree.options.labelSpace - box.width
-                    : d.y + $tree.options.labelSpace;
+                var right = d.children || d._children ?
+                    d.y + $tree.options.labelSpace :
+                    d.y + box.width + $tree.options.labelSpace;
+                var left = d.children || d._children ?
+                    d.y + $tree.options.labelSpace - box.width :
+                    d.y + $tree.options.labelSpace;
 
                 return [left, right, right - left];
             }
@@ -286,9 +283,9 @@ define([
                 function (d) {
                     d.y = $tree.depth(d, rootOffset, chartOffset);
 
-                    d.y = $tree.options.fixed && (!d.children || d.children.length === 0)
-                        ? $tree.options.fixedDepth
-                        : d.y;
+                    d.y = $tree.options.fixed && (!d.children || d.children.length === 0) ?
+                        $tree.options.fixedDepth :
+                        d.y;
 
                     if (d.name === undefined && $tree.options.nameFunction) {
                         d.name = $tree.options.nameFunction.call($tree, d);
@@ -352,42 +349,40 @@ define([
             newWidth = this.options.staticWidth ? $tree.options.originalWidth : newWidth;
             newHeight = this.options.staticHeight ? $tree.options.originalHeight : newHeight + this.options.yGutter + this.options.yPadding;
 
-            this.$elem.animate(
-                {
+            this.$elem.animate({
                     'width': newWidth,
                     'height': newHeight
                 },
                 duration
-                );
+            );
 
-            var node = chart.selectAll("g.tree-node")
+            var node = chart.selectAll('g.tree-node')
                 .data(this.nodes, function (d) {
                     return $tree.uniqueness(d);
                 });
 
             // Enter any new nodes at the parent's previous position.
-            var nodeEnter = node.enter().append("g")
-                .attr("class", "tree-node")
+            var nodeEnter = node.enter().append('g')
+                .attr('class', 'tree-node')
                 .attr('data-node-id', function (d) {
                     return $tree.uniqueness(d);
                 })
                 .attr('opacity', 0)
-                .attr("transform", function (d) {
-                    return "translate(" + source.y0 + "," + source.x0 + ")";
-                })
-                ;
+                .attr('transform', function (d) {
+                    return 'translate(' + source.y0 + ',' + source.x0 + ')';
+                });
 
-            nodeEnter.append("circle")
-                .attr("class", "circle")
-                .attr("r", 1e-6)
+            nodeEnter.append('circle')
+                .attr('class', 'circle')
+                .attr('r', 1e-6)
                 .attr('style', 'cursor : pointer;')
                 .attr('stroke', function (d) {
                     return d.stroke || $tree.options.circleStroke;
                 })
-                .style("fill", function (d) {
+                .style('fill', function (d) {
                     return d._children ? $tree.options.openCircleFill : $tree.options.closedCircleFill;
                 })
-                .on("click", function (d) {
+                .on('click', function (d) {
 
                     if ($tree.oneClick) {
 
@@ -414,7 +409,7 @@ define([
                     if ($tree.options.nodeOver) {
                         $tree.options.nodeOver.call($tree, d, this);
                     } else if (d.tooltip) {
-                        $tree.showToolTip({label: d.tooltip});
+                        $tree.showToolTip({ label: d.tooltip });
                     }
                 })
                 .on('mouseout', function (d) {
@@ -425,14 +420,14 @@ define([
                     }
                 });
 
-            nodeEnter.append("text")
+            nodeEnter.append('text')
                 //.attr('style', 'font-size : 11px')
                 .attr('class', 'tree-nodeText')
                 .attr('data-text-id', function (d) {
                     return $tree.uniqueness(d);
                 })
                 .attr('style', 'font-size : 11px;cursor : pointer;-webkit-touch-callout: none;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;')
-                .attr("dy", ".35em")
+                .attr('dy', '.35em')
                 .text(function (d) {
                     var name = d.name;
                     if (d.width > $tree.options.labelWidth && $tree.options.truncationFunction) {
@@ -440,11 +435,11 @@ define([
                     }
                     return name;
                 })
-                .style("fill-opacity", 1e-6)
+                .style('fill-opacity', 1e-6)
                 .attr('fill', function (d) {
                     return d.fill || 'black';
                 })
-                .on("click", function (d) {
+                .on('click', function (d) {
 
                     if ($tree.oneClick) {
 
@@ -488,54 +483,53 @@ define([
             var nodeUpdate = node.transition()
                 .duration(duration)
                 .attr('opacity', 1)
-                .attr("transform", function (d) {
-                    var y = $tree.options.fixed && (!d.children || d.length === 0)
-                        ? $tree.options.fixedDepth
-                        : d.y;
+                .attr('transform', function (d) {
+                    var y = $tree.options.fixed && (!d.children || d.length === 0) ?
+                        $tree.options.fixedDepth :
+                        d.y;
                     if ($tree.options.bias === 'leaf' && d.parent !== undefined) {
                         y = $tree.options.fixedDepth - d.nodeDepth * $tree.options.distance;
                     }
-                    return "translate(" + y + "," + d.x + ")";
-                })
-                ;
+                    return 'translate(' + y + ',' + d.x + ')';
+                });
 
-            nodeUpdate.select("circle")
-                .attr("r", function (d) {
+            nodeUpdate.select('circle')
+                .attr('r', function (d) {
                     return d.radius || $tree.options.circleRadius;
                 })
                 .attr('stroke', function (d) {
                     return d.stroke || $tree.options.circleStroke;
                 })
-                .style("fill", function (d) {
+                .style('fill', function (d) {
                     return d._children ? $tree.options.openCircleFill : $tree.options.closedCircleFill;
                 })
 
-                .attr('visibility', function (d) {
-                    var isLeaf = true;
-                    if (d.children && d.children.length) {
-                        isLeaf = false;
-                    }
+            .attr('visibility', function (d) {
+                var isLeaf = true;
+                if (d.children && d.children.length) {
+                    isLeaf = false;
+                }
 
-                    if (isLeaf && $tree.options.displayStyle.match(/n/)) {
-                        return 'visible';
-                    } else if (!isLeaf && $tree.options.displayStyle.match(/N/)) {
-                        return 'visible';
-                    } else if (isLeaf && $tree.options.displayStyle.match(/c/) && (d.name !== undefined && d.name.length > 0)) {
-                        return 'visible';
-                    } else if (!isLeaf && $tree.options.displayStyle.match(/C/) && (d.name !== undefined && d.name.length > 0)) {
-                        return 'visible';
-                    } else {
-                        return 'hidden';
-                    }
-                });
+                if (isLeaf && $tree.options.displayStyle.match(/n/)) {
+                    return 'visible';
+                } else if (!isLeaf && $tree.options.displayStyle.match(/N/)) {
+                    return 'visible';
+                } else if (isLeaf && $tree.options.displayStyle.match(/c/) && (d.name !== undefined && d.name.length > 0)) {
+                    return 'visible';
+                } else if (!isLeaf && $tree.options.displayStyle.match(/C/) && (d.name !== undefined && d.name.length > 0)) {
+                    return 'visible';
+                } else {
+                    return 'hidden';
+                }
+            });
 
-            nodeUpdate.select("text")
-                .style("fill-opacity", 1)
-                .attr("x", function (d) {
+            nodeUpdate.select('text')
+                .style('fill-opacity', 1)
+                .attr('x', function (d) {
                     return d.children ? 0 - $tree.options.labelSpace : $tree.options.labelSpace;
                 })
-                .attr("text-anchor", function (d) {
-                    return d.children ? "end" : "start";
+                .attr('text-anchor', function (d) {
+                    return d.children ? 'end' : 'start';
                 })
                 .attr('visibility', function (d) {
                     var isLeaf = true;
@@ -562,16 +556,16 @@ define([
             var nodeExit = node.exit().transition()
                 .duration(duration)
                 .attr('opacity', 0)
-                .attr("transform", function (d) {
-                    return "translate(" + source.y + "," + source.x + ")";
+                .attr('transform', function (d) {
+                    return 'translate(' + source.y + ',' + source.x + ')';
                 })
                 .remove();
 
-            nodeExit.select("circle")
-                .attr("r", 1e-6);
+            nodeExit.select('circle')
+                .attr('r', 1e-6);
 
-            nodeExit.select("text")
-                .style("fill-opacity", 1e-6);
+            nodeExit.select('text')
+                .style('fill-opacity', 1e-6);
 
             nodeExit.each(function (d, i) {
                 if ($tree.options.nodeExitCallback) {
@@ -580,14 +574,14 @@ define([
             });
 
             // Update the links
-            var link = chart.selectAll("path.tree-link")
+            var link = chart.selectAll('path.tree-link')
                 .data($tree.treeLayout.links($tree.nodes), function (d) {
                     return $tree.uniqueness(d.target);
                 });
 
             // Enter any new links at the parent's previous position.
-            link.enter().insert("path", "g")
-                .attr("class", "tree-link")
+            link.enter().insert('path', 'g')
+                .attr('class', 'tree-link')
                 .attr('data-link-id', function (d) {
                     return $tree.uniqueness(d.target);
                 })
@@ -595,9 +589,9 @@ define([
                 .attr('stroke', function (d) {
                     return d.target.lineStroke || $tree.options.lineStroke;
                 })
-                .attr("d", function (d) {
-                    var o = {x: source.x0, y: source.y0};
-                    return $tree.diagonal({source: o, target: o});
+                .attr('d', function (d) {
+                    var o = { x: source.x0, y: source.y0 };
+                    return $tree.diagonal({ source: o, target: o });
                 })
                 .on('mouseover', function (d) {
                     if ($tree.options.lineOver) {
@@ -611,7 +605,7 @@ define([
                 })
                 .transition()
                 .duration(duration)
-                .attr("d", $tree.diagonal);
+                .attr('d', $tree.diagonal);
 
             // Transition links to their new position.
             link.transition()
@@ -624,15 +618,15 @@ define([
 
                     return weight + 'px';
                 })
-                .attr("d", $tree.diagonal);
+                .attr('d', $tree.diagonal);
 
             // Transition exiting nodes to the parent's new position.
             link.exit().transition()
                 .duration(duration)
                 .attr('opacity', 0)
-                .attr("d", function (d) {
-                    var o = {x: source.x, y: source.y};
-                    return $tree.diagonal({source: o, target: o});
+                .attr('d', function (d) {
+                    var o = { x: source.x, y: source.y };
+                    return $tree.diagonal({ source: o, target: o });
                 })
                 .remove();
 
@@ -677,9 +671,9 @@ define([
 
             var getYCoords = function (d) {
                 var sourceY = d.source.y;
-                var targetY = $tree.options.fixed && (!d.target.children || d.target.children.length === 0)
-                    ? $tree.options.fixedDepth
-                    : d.target.y;
+                var targetY = $tree.options.fixed && (!d.target.children || d.target.children.length === 0) ?
+                    $tree.options.fixedDepth :
+                    d.target.y;
 
                 if ($tree.options.bias === 'leaf' && d.source.nodeDepth !== undefined && d.target.nodeDepth !== undefined) {
                     //Sigh. This is gonna be a pain in the ass.
@@ -694,28 +688,28 @@ define([
 
                 }
 
-                return {source: sourceY, target: targetY};
+                return { source: sourceY, target: targetY };
             };
 
             if (this.options.lineStyle === 'curve') {
                 this.diagonal = d3.svg.diagonal()
                     .projection(function (d) {
-                        var y = $tree.options.fixed && (!d.children || d.length === 0)
-                            ? $tree.options.fixedDepth
-                            : d.y;
+                        var y = $tree.options.fixed && (!d.children || d.length === 0) ?
+                            $tree.options.fixedDepth :
+                            d.y;
                         return [y, d.x];
                     });
             } else if (this.options.lineStyle === 'straight') {
                 this.diagonal = function (d) {
                     var yCoords = getYCoords(d);
 
-                    return "M" + yCoords.source + ',' + d.source.x + 'L' + yCoords.target + ',' + d.target.x;
+                    return 'M' + yCoords.source + ',' + d.source.x + 'L' + yCoords.target + ',' + d.target.x;
                 };
             } else if (this.options.lineStyle === 'square') {
                 this.diagonal = function (d) {
                     var yCoords = getYCoords(d);
 
-                    return "M" + yCoords.source + ',' + d.source.x +
+                    return 'M' + yCoords.source + ',' + d.source.x +
                         'L' + yCoords.source + ',' + d.target.x +
                         'L' + yCoords.target + ',' + d.target.x;
                 };
@@ -725,7 +719,7 @@ define([
 
                     var halfY = (yCoords.target - yCoords.source) / 2 + yCoords.source;
 
-                    return "M" + yCoords.source + ',' + d.source.x +
+                    return 'M' + yCoords.source + ',' + d.source.x +
                         'L' + halfY + ',' + d.source.x +
                         'L' + halfY + ',' + d.target.x +
                         'L' + yCoords.target + ',' + d.target.x;

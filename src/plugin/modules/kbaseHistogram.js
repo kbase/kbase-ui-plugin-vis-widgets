@@ -3,14 +3,17 @@
 define([
     'jquery',
     'd3',
-    'kb/widget/legacy/authenticatedWidget'
-], function ($, d3) {
+    'kb_widget/legacy/authenticatedWidget'
+], function (
+    $,
+    d3
+) {
     'use strict';
 
     $.KBWidget({
-        name: "kbaseHistogram",
-        parent: "kbaseAuthenticatedWidget",
-        version: "1.0.0",
+        name: 'kbaseHistogram',
+        parent: 'kbaseAuthenticatedWidget',
+        version: '1.0.0',
         options: {
             numBins: 50,
             minCutoff: 0.001,
@@ -58,7 +61,7 @@ define([
 
             this.appendUI(this.$elem);
 
-            this.gradientID = this.data('barchart').linearGradient({colors: this.options.colors});
+            this.gradientID = this.data('barchart').linearGradient({ colors: this.options.colors });
 
             return this;
         },
@@ -66,7 +69,7 @@ define([
 
             var $me = this;
 
-            var $barElem = $.jqElem('div').css({width: 800, height: 500});
+            var $barElem = $.jqElem('div').css({ width: 800, height: 500 });
 
             var $barContainer = $.jqElem('div')
                 .append(
@@ -81,10 +84,10 @@ define([
                                 $.jqElem('span')
                                 .attr('id', 'numBins')
                                 .text($me.options.numBins)
-                                )
-                            .append(' bins')
                             )
+                            .append(' bins')
                         )
+                    )
                     .append(
                         $.jqElem('div')
                         .attr('class', 'col-md-8')
@@ -105,9 +108,9 @@ define([
                                 $me.options.numBins = parseInt($(this).val());
                                 $me.renderHistogram();
                             })
-                            )
                         )
                     )
+                )
                 .append(
                     $.jqElem('div')
                     .attr('class', 'col-md-4')
@@ -118,7 +121,7 @@ define([
                             $.jqElem('div')
                             .attr('class', 'input-group-addon')
                             .append(' Expression level at least ')
-                            )
+                        )
                         .append(
                             $.jqElem('input')
                             .attr('type', 'input')
@@ -129,9 +132,9 @@ define([
                                 $me.options.minCutoff = parseFloat($(this).val());
                                 $me.renderHistogram();
                             })
-                            )
                         )
                     )
+                )
                 .append(
                     $.jqElem('div')
                     .attr('class', 'col-md-4 col-md-offset-3')
@@ -142,7 +145,7 @@ define([
                             $.jqElem('div')
                             .attr('class', 'input-group-addon')
                             .append(' Expression level at most ')
-                            )
+                        )
                         .append(
                             $.jqElem('input')
                             .attr('type', 'input')
@@ -153,9 +156,9 @@ define([
                                 $me.options.maxCutoff = parseFloat($(this).val());
                                 $me.renderHistogram();
                             })
-                            )
                         )
                     )
+                )
                 .append($barElem);
 
             $elem
@@ -176,7 +179,7 @@ define([
                             $barchart.dataset(),
                             function (i, d) {
                                 if (d.bar === L) {
-                                    $barchart.showToolTip({label: d.tooltip});
+                                    $barchart.showToolTip({ label: d.tooltip });
                                 }
                             }
                         );
@@ -208,10 +211,9 @@ define([
                 $.each(this.dataset(),
                     function (i, v) {
                         if (
-                            (isNaN($me.options.minCutoff) || v >= $me.options.minCutoff)
-                            &&
+                            (isNaN($me.options.minCutoff) || v >= $me.options.minCutoff) &&
                             (isNaN($me.options.maxCutoff) || v <= $me.options.maxCutoff)
-                            ) {
+                        ) {
                             filteredDataset.push(v);
                         }
                     }
@@ -228,16 +230,14 @@ define([
                 function (i, bin) {
                     var range = Math.round(bin.x * sigDigits) / sigDigits + ' to ' + (Math.round((bin.x + bin.dx) * sigDigits) / sigDigits);
 
-                    bars.push(
-                        {
-                            bar: range,
-                            value: bin.y,
-                            color: 'url(#' + $me.gradientID + ')', //'blue',
-                            //color : 'blue',
-                            tooltip: bin.y + ' in range<br>' + range,
-                            id: bin.x
-                        }
-                    );
+                    bars.push({
+                        bar: range,
+                        value: bin.y,
+                        color: 'url(#' + $me.gradientID + ')', //'blue',
+                        //color : 'blue',
+                        tooltip: bin.y + ' in range<br>' + range,
+                        id: bin.x
+                    });
                 }
             );
 

@@ -1,30 +1,28 @@
-/*global define*/
-/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
     'kb_vis_linechart'
-], function ($, d3) {
+], function (
+    $,
+    d3
+) {
     'use strict';
 
     $.KBWidget({
-        name: "kbaseLineSerieschart",
-        parent: "kbaseLinechart",
-        version: "1.0.0",
-        options: {
-        },
+        name: 'kbaseLineSerieschart',
+        parent: 'kbaseLinechart',
+        version: '1.0.0',
+        options: {},
         _accessors: [
             'labels'
         ],
         xTickValues: function () {
-            var $ls = this;
-
             var m = d3.merge(
                 this.dataset().map(function (d) {
-                return d.values.map(function (l) {
-                    return l.x;
-                });
-            }));
+                    return d.values.map(function (l) {
+                        return l.x;
+                    });
+                }));
 
             m = d3.set(m).values();
 

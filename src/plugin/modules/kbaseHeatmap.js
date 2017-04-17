@@ -1,16 +1,17 @@
-/*global define*/
-/*jslint white: true, browser: true */
 define([
     'jquery',
     'd3',
     'kb_vis_visWidget'
-], function ($, d3) {
+], function (
+    $,
+    d3
+) {
     'use strict';
 
     $.KBWidget({
-        name: "kbaseHeatmap",
-        parent: "kbaseVisWidget",
-        version: "1.0.0",
+        name: 'kbaseHeatmap',
+        parent: 'kbaseVisWidget',
+        version: '1.0.0',
         options: {
             scaleAxes: true,
             xScaleType: 'ordinal',
@@ -35,7 +36,7 @@ define([
         ],
         init: function (options) {
             this._super(options);
-            
+
             var colorScaleDomain = this.colorScale().nice().domain(),
                 zeroPercent = 100 * Math.abs(colorScaleDomain[0]) / (Math.abs(colorScaleDomain[0]) + Math.abs(colorScaleDomain[2]));
             this.options.gradientID = this.linearGradient({
@@ -57,7 +58,7 @@ define([
                 d3.scale.ordinal()
                 .domain(d3.range(0, 1))
                 .range(newSpectrum)
-                );
+            );
         },
         defaultXDomain: function () {
 
@@ -123,7 +124,7 @@ define([
                 gxAxis = this.D3svg().select('.yGutter')
                     .append('g')
                     .attr('class', 'xAxis axis')
-                    .attr("transform", "translate(0," + this.yGutterBounds().size.height + ")");
+                    .attr('transform', 'translate(0,' + this.yGutterBounds().size.height + ')');
             }
 
             var $hm = this;
@@ -131,8 +132,7 @@ define([
             gxAxis
                 .transition()
                 .duration(0)
-                .call(xAxis)
-                ;
+                .call(xAxis);
 
             /*
              As is typical, my life is pain. Here's the deal -
@@ -174,7 +174,7 @@ define([
 
                 d3.select(this).attr('data-id', $hm.dataset().column_ids[label_idx]);
                 d3.select(this)
-                    .attr("transform", function (d, i) {
+                    .attr('transform', function (d, i) {
                         var bounds = $hm.yGutterBounds();
                         //bullshit hardwired magic numbers. The xAxis is "known"(?) to position @ (0,-9)
                         //arbitrarily rotate around -12 because it looks right. I got nothin'.
@@ -182,7 +182,7 @@ define([
                         //5 pixels up. Whee!
 
                         var width = d3.select(this).node().getComputedTextLength();
-                        return "rotate(-45,0,0) translate(" + (width / 2 + 5) + ",5)";// translate(2,3)";
+                        return 'rotate(-45,0,0) translate(' + (width / 2 + 5) + ',5)'; // translate(2,3)";
                     })
                     .on('mouseover', function (d) {
                         d3.select(this).attr('fill', $hm.options.overColor);
@@ -191,11 +191,9 @@ define([
                         if ($hm.options.labelOver) {
                             $hm.options.labelOver.call(this, d);
                         } else if (d3this.text() !== label) {
-                            $hm.showToolTip(
-                                {
-                                    label: label
-                                }
-                            );
+                            $hm.showToolTip({
+                                label: label
+                            });
                         }
                     })
                     .on('mouseout', function (d) {
@@ -245,8 +243,7 @@ define([
                 .attr('font-size', '11px')
                 .attr('font-family', 'sans-serif')
                 .attr('fill', 'black')
-                .attr('fill', 'url(#' + this.options.gradientID + ')')
-                ;
+                .attr('fill', 'url(#' + this.options.gradientID + ')');
 
             var colorScale = this.colorScale();
 
@@ -261,19 +258,16 @@ define([
             var tempAxis =
                 d3.svg.axis()
                 .scale(tempScale)
-                .orient('right')
-                ;
+                .orient('right');
 
 
             var gtempAxis = this.D3svg().select(this.region('xGutter')).select('.tempAxis');
-
-            var $hm = this;
 
             if (gtempAxis[0][0] === undefined) {
                 gtempAxis = this.D3svg().select(this.region('xGutter'))
                     .append('g')
                     .attr('class', 'tempAxis axis')
-                    .attr("transform", "translate(" + (xGutterBounds.size.width / 3 + 6) + ",0)")
+                    .attr('transform', 'translate(' + (xGutterBounds.size.width / 3 + 6) + ',0)')
             }
 
             tempAxis.tickFormat(
@@ -284,7 +278,7 @@ define([
                  }
                  return d;
                  }*/
-                );
+            );
 
             gtempAxis.transition().call(tempAxis);
 
@@ -308,7 +302,7 @@ define([
                 gyAxis = this.D3svg().select(this.region('xPadding'))
                     .append('g')
                     .attr('class', 'yAxis axis')
-                    .attr("transform", "translate(" + this.xPaddingBounds().size.width + ",0)")
+                    .attr('transform', 'translate(' + this.xPaddingBounds().size.width + ',0)')
             }
 
             /*yAxis.tickFormat(function(d) {
@@ -342,11 +336,9 @@ define([
                         if ($hm.options.labelOver) {
                             $hm.options.labelOver.call(this, d);
                         } else if (d3this.text() !== label) {
-                            $hm.showToolTip(
-                                {
-                                    label: label
-                                }
-                            );
+                            $hm.showToolTip({
+                                label: label
+                            });
                         }
                     })
                     .on('mouseout', function (d) {
@@ -427,7 +419,7 @@ define([
                             }
 
                             var scaled = xIdScale(xId) + 1;
-                            return scaled;//$hm.xScale()(xId) + 1
+                            return scaled; //$hm.xScale()(xId) + 1
                         }
                     )
                     .attr('y',
@@ -439,7 +431,7 @@ define([
                             }
 
                             var scaled = yIdScale(yId) + 1;
-                            return scaled;//$hm.yScale()(yId) + 1
+                            return scaled; //$hm.yScale()(yId) + 1
                         }
                     )
                     //.attr('y', function (d) { return $hm.yScale()(d.y) })
@@ -459,81 +451,78 @@ define([
 
                             return d.color;
                         }
-                    )
-                    ;
+                    );
                 return this;
-            }
+            };
 
             var mouseAction = function () {
                 this.on('mouseover', function (d) {
-                    if ($hm.options.overColor) {
-                        d3.select(this)
-                            //.attr('fill', $hm.options.overColor)
-                            .attr('stroke', $hm.options.overColor)
-//                            .attr('opacity', '100%')
-                            .attr('stroke-width', 5);
+                        if ($hm.options.overColor) {
+                            d3.select(this)
+                                //.attr('fill', $hm.options.overColor)
+                                .attr('stroke', $hm.options.overColor)
+                                //                            .attr('opacity', '100%')
+                                .attr('stroke-width', 5);
 
-                        $hm.D3svg().select('.yGutter').selectAll('g g text')
-                            .attr("fill",
-                                function (r, ri) {
-                                    var xId = d.x;
-                                    if ($hm.options.useIDMapping) {
-                                        xId = $hm.xIDMap()[xId];
+                            $hm.D3svg().select('.yGutter').selectAll('g g text')
+                                .attr('fill',
+                                    function (r, ri) {
+                                        var xId = d.x;
+                                        if ($hm.options.useIDMapping) {
+                                            xId = $hm.xIDMap()[xId];
+                                        }
+
+                                        if (d3.select(this).attr('data-id') === xId) {
+                                            return $hm.options.overColor;
+                                        }
                                     }
+                                );
 
-                                    if (d3.select(this).attr('data-id') === xId) {
-                                        return $hm.options.overColor;
+                            $hm.D3svg().select('.xPadding').selectAll('g g text')
+                                .attr('fill',
+                                    function (r, ri) {
+                                        var yId = d.y;
+                                        if ($hm.options.useIDMapping) {
+                                            yId = $hm.yIDMap()[yId];
+                                        }
+                                        if (d3.select(this).attr('data-id') === yId) {
+                                            return $hm.options.overColor;
+                                        }
                                     }
-                                }
-                            );
+                                );
 
-                        $hm.D3svg().select('.xPadding').selectAll('g g text')
-                            .attr("fill",
-                                function (r, ri) {
-                                    var yId = d.y;
-                                    if ($hm.options.useIDMapping) {
-                                        yId = $hm.yIDMap()[yId];
-                                    }
-                                    if (d3.select(this).attr('data-id') === yId) {
-                                        return $hm.options.overColor;
-                                    }
-                                }
-                            );
-
-                        var xId = d.x;
-                        if ($hm.options.useIDMapping) {
-                            xId = $hm.xIDMap()[xId];
-                        }
-                        var yId = d.y;
-                        if ($hm.options.useIDMapping) {
-                            yId = $hm.yIDMap()[yId];
-                        }
-
-                        $hm.showToolTip(
-                            {
-                                label: d.label || 'Value for: ' + d.row + ' - ' + d.column + '<br>is ' + d.value
+                            var xId = d.x;
+                            if ($hm.options.useIDMapping) {
+                                xId = $hm.xIDMap()[xId];
                             }
-                        );
+                            var yId = d.y;
+                            if ($hm.options.useIDMapping) {
+                                yId = $hm.yIDMap()[yId];
+                            }
 
-                    }
-                })
+                            $hm.showToolTip({
+                                label: d.label || 'Value for: ' + d.row + ' - ' + d.column + '<br>is ' + d.value
+                            });
+
+                        }
+                    })
                     .on('mouseout', function (d) {
                         if ($hm.options.overColor) {
                             d3.select(this)
                                 //.transition()
                                 //.attr('fill', d.color)
-//                            .attr('opacity', function (d) { return d.value })
+                                //                            .attr('opacity', function (d) { return d.value })
                                 .attr('stroke', 0);
 
                             $hm.D3svg().select('.yGutter').selectAll('g g text')
-                                .attr("fill",
+                                .attr('fill',
                                     function (r, ri) {
                                         return 'black';
                                     }
                                 );
 
                             $hm.D3svg().select('.xPadding').selectAll('g g text')
-                                .attr("fill",
+                                .attr('fill',
                                     function (r, ri) {
                                         return 'black';
                                     }
@@ -551,9 +540,9 @@ define([
                 return this;
             };
 
-            var transitionTime = this.initialized
-                ? this.options.transitionTime
-                : 0;
+            var transitionTime = this.initialized ?
+                this.options.transitionTime :
+                0;
 
             var heatmap = this.D3svg().select(this.region('chart')).selectAll('.hmBG').data([0]);
 
@@ -575,16 +564,14 @@ define([
             for (var i = 0; i < this.dataset().data.length; i++) {
                 var row = this.dataset().data[i];
                 for (var j = 0; j < row.length; j++) {
-                    oldStyleDataset.push(
-                        {
-                            x: this.dataset().column_ids[j],
-                            y: this.dataset().row_ids[i],
-                            column: this.dataset().column_labels[j],
-                            row: this.dataset().row_labels[i],
-                            value: row[j], //valScale(row[j]),
-                            color: colorScale(row[j])
-                        }
-                    );
+                    oldStyleDataset.push({
+                        x: this.dataset().column_ids[j],
+                        y: this.dataset().row_ids[i],
+                        column: this.dataset().column_labels[j],
+                        row: this.dataset().row_labels[i],
+                        value: row[j], //valScale(row[j]),
+                        color: colorScale(row[j])
+                    });
                 }
             }
 
@@ -593,8 +580,7 @@ define([
             chart
                 .enter()
                 .append('rect')
-                .attr('class', 'davis-cell')
-                ;
+                .attr('class', 'davis-cell');
 
             chart
                 .call(mouseAction)
@@ -604,15 +590,11 @@ define([
                 .call($hm.endall, function () {
                     $hm.initialized = true;
                 });
-            ;
 
             chart
                 .data(oldStyleDataset)
                 .exit()
                 .remove();
-
-
         },
     });
-
 });

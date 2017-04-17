@@ -1,5 +1,3 @@
-/*global define*/
-/*jslint white: true, browser: true*/
 define([
     'jquery',
     'kb_vis_linechart'
@@ -7,9 +5,9 @@ define([
     'use strict';
 
     $.KBWidget({
-        name: "kbaseSparkline",
-        parent: "kbaseLinechart",
-        version: "1.0.0",
+        name: 'kbaseSparkline',
+        parent: 'kbaseLinechart',
+        version: '1.0.0',
         options: {
             xInset: 0.02,
             yInset: 0.02,
@@ -35,8 +33,8 @@ define([
             var sparkValues = dataset;
 
             dataset = [{
-                    values: dataset
-                }];
+                values: dataset
+            }];
 
             this._super(dataset);
 
